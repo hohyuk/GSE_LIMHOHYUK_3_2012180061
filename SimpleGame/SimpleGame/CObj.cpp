@@ -1,0 +1,40 @@
+#include "stdafx.h"
+#include "CObj.h"
+
+
+CObj::CObj()
+{
+}
+
+
+CObj::~CObj()
+{
+}
+
+void CObj::Initialize()
+{
+	xPos = 0;
+	yPos = 0;
+	zPos = 0;
+	size = 10;
+	colR = float(rand() % 255) / 255.f;
+	colG = float(rand() % 255) / 255.f;
+	colB = float(rand() % 255) / 255.f;
+	moveX = 0.1f;
+	moveY = 0.1f;
+	b_Draw = false;
+}
+
+void CObj::Update()
+{
+	if (xPos > 250)
+		moveX = -0.1f;
+	else if (xPos < -250)
+		moveX = 0.1f;
+	if (yPos > 250)
+		moveY = -0.1f;
+	else if (yPos < -250)
+		moveY = 0.1f;
+	xPos += moveX;
+	yPos += moveY;
+}
