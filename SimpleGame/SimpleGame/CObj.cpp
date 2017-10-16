@@ -35,6 +35,6 @@ void CObj::Update()
 		moveY = -0.1f;
 	else if (yPos < -250)
 		moveY = 0.1f;
-	xPos += moveX;
-	yPos += moveY;
+	xPos += moveX*0.016f;
+	yPos += moveY*0.016f;
 }
