@@ -22,6 +22,7 @@ private:
 	float colR, colG, colB;
 	float size;
 	float moveX, moveY;
+	float speed;
 	bool b_Draw;
 };
 

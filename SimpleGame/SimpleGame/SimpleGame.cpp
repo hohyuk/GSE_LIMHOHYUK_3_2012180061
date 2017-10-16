@@ -18,6 +18,8 @@ but WITHOUT ANY WARRANTY.
 #include "CObj.h"
 const int WinX{ 500 };
 const int WinY{ 500 };
+const int Size{ 10 };
+int Count{ 0 };
 Renderer *g_Renderer = NULL;
 CObj* g_Obj = NULL;
 void RenderScene(void)
@@ -26,15 +28,23 @@ void RenderScene(void)
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
 	// Renderer Test
-	if (g_Obj->GetDraw())
-		g_Renderer->DrawSolidRect(g_Obj->GetXpos(), g_Obj->GetYpos(), g_Obj->GetZpos(), g_Obj->GetSize(), g_Obj->GetcolorR(), g_Obj->GetcolorG(), g_Obj->GetcolorB(), 1);
+	for (int i = 0; i < Size; ++i)
+	{
+		if (g_Obj[i].GetDraw())
+			g_Renderer->DrawSolidRect(g_Obj[i].GetXpos(), g_Obj[i].GetYpos(), g_Obj[i].GetZpos(), g_Obj[i].GetSize(), g_Obj[i].GetcolorR(), g_Obj[i].GetcolorG(), g_Obj[i].GetcolorB(), 1);
 
+	}
 	glutSwapBuffers();
 }
 
 void Idle(void)
 {
-	g_Obj->Update();
+	for (int i = 0; i < Size; ++i)
+	{
+		if (g_Obj[i].GetDraw())
+			g_Obj[i].Update();
+	}
+	
 	RenderScene();
 }
 
@@ -43,14 +53,18 @@ void MouseInput(int button, int state, int x, int y)
 	RenderScene();
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		g_Obj->SetDraw(true);
+		g_Obj[Count].Initialize();
+		g_Obj[Count].SetDraw(true);
 		float resetX = float(x - WinX / 2);
 		float resetY = float(-(y - WinY / 2));
-		g_Obj->SetPos(resetX, resetY);
+		g_Obj[Count].SetPos(resetX, resetY);
 
 		std::cout << "" << std::endl;
+		std::cout << "Count : " << Count << std::endl;
 		std::cout << "x = " << resetX << " , y = " << resetY <<  std::endl;
-
+		Count++;
+		if (Count > Size - 1)
+			Count = 0;
 	}
 }
 
@@ -91,8 +105,7 @@ int main(int argc, char **argv)
 		std::cout << "Renderer could not be initialized.. \n";
 	}
 
-	g_Obj = new CObj();
-	g_Obj->Initialize();
+	g_Obj = new CObj[Size];
 
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
@@ -103,7 +116,7 @@ int main(int argc, char **argv)
 	glutMainLoop();
 
 	delete g_Renderer;
-	delete g_Obj;
+	delete[] g_Obj;
     return 0;
 }
 
