@@ -15,36 +15,39 @@ but WITHOUT ANY WARRANTY.
 
 #include "Renderer.h"
 
+#include "SceneMgr.h"
 #include "CObj.h"
+
 const int WinX{ 500 };
 const int WinY{ 500 };
-const int Size{ 10 };
-int Count{ 0 };
-Renderer *g_Renderer = NULL;
-CObj* g_Obj = NULL;
+
+CSceneMgr * g_SceneMgr = NULL;
+
+
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
 	// Renderer Test
-	for (int i = 0; i < Size; ++i)
+	/*for (int i = 0; i < Size; ++i)
 	{
 		if (g_Obj[i].GetDraw())
 			g_Renderer->DrawSolidRect(g_Obj[i].GetXpos(), g_Obj[i].GetYpos(), g_Obj[i].GetZpos(), g_Obj[i].GetSize(), g_Obj[i].GetcolorR(), g_Obj[i].GetcolorG(), g_Obj[i].GetcolorB(), 1);
 
-	}
+	}*/
+	g_SceneMgr->Render();
 	glutSwapBuffers();
 }
 
 void Idle(void)
 {
-	for (int i = 0; i < Size; ++i)
+	/*for (int i = 0; i < Size; ++i)
 	{
 		if (g_Obj[i].GetDraw())
 			g_Obj[i].Update();
-	}
-	
+	}*/
+	g_SceneMgr->Update();
 	RenderScene();
 }
 
@@ -53,7 +56,7 @@ void MouseInput(int button, int state, int x, int y)
 	RenderScene();
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
-		g_Obj[Count].Initialize();
+		/*g_Obj[Count].Initialize();
 		g_Obj[Count].SetDraw(true);
 		float resetX = float(x - WinX / 2);
 		float resetY = float(-(y - WinY / 2));
@@ -64,7 +67,8 @@ void MouseInput(int button, int state, int x, int y)
 		std::cout << "x = " << resetX << " , y = " << resetY <<  std::endl;
 		Count++;
 		if (Count > Size - 1)
-			Count = 0;
+			Count = 0;*/
+		g_SceneMgr->Mouse(x, y);
 	}
 }
 
@@ -99,13 +103,14 @@ int main(int argc, char **argv)
 	}
 
 	// Initialize Renderer
-	g_Renderer = new Renderer(WinX, WinY);
+	/*g_Renderer = new Renderer(WinX, WinY);
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";
 	}
 
-	g_Obj = new CObj[Size];
+	g_Obj = new CObj[Size];*/
+	g_SceneMgr->Init();
 
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
@@ -115,8 +120,8 @@ int main(int argc, char **argv)
 
 	glutMainLoop();
 
-	delete g_Renderer;
-	delete[] g_Obj;
+	g_SceneMgr->Release();
+	delete g_SceneMgr;
     return 0;
 }
 

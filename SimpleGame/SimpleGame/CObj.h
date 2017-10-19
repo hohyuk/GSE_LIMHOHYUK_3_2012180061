@@ -15,6 +15,7 @@ public:
 	bool GetDraw() { return b_Draw; }
 	void SetDraw(bool draw) { b_Draw = draw; }
 	void SetPos(float x, float y) { xPos = x, yPos = y; }
+	void SetColor(float r, float g, float b) { colR = r, colG = g, colB = b; }
 	void Initialize();
 	void Update();
 private:
