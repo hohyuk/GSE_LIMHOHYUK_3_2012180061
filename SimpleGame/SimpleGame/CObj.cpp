@@ -20,10 +20,17 @@ void CObj::Initialize()
 	colR = float(rand() % 255) / 255.f;
 	colG = float(rand() % 255) / 255.f;
 	colB = float(rand() % 255) / 255.f;
-	speed = 1.f;
+	int random = rand() % 2;
+	if (random)
+	{
+		speed = 1.f;
+	}
+	else
+	{
+		speed = -1.f;
+	}
 	moveX = speed;
 	moveY = speed;
-	
 	b_Draw = false;
 }
 
@@ -37,6 +44,6 @@ void CObj::Update()
 		moveY = -speed;
 	else if (yPos < -250)
 		moveY = speed;
-	xPos += moveX*0.016f;
-	yPos += moveY*0.016f;
+	xPos += moveX * 0.016f;
+	yPos += moveY * 0.016f;
 }
