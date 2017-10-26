@@ -7,13 +7,10 @@ it under the terms of the What The Hell License. Do it plz.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY.
 */
-
 #include "stdafx.h"
 #include <iostream>
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
-
-#include "Renderer.h"
 
 #include "SceneMgr.h"
 #include "CObj.h"
@@ -23,19 +20,12 @@ const int WinY{ 500 };
 
 CSceneMgr * g_SceneMgr = NULL;
 
-
+DWORD g_prevTime = 0;
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
-
-	// Renderer Test
-	/*for (int i = 0; i < Size; ++i)
-	{
-		if (g_Obj[i].GetDraw())
-			g_Renderer->DrawSolidRect(g_Obj[i].GetXpos(), g_Obj[i].GetYpos(), g_Obj[i].GetZpos(), g_Obj[i].GetSize(), g_Obj[i].GetcolorR(), g_Obj[i].GetcolorG(), g_Obj[i].GetcolorB(), 1);
-
-	}*/
+	
 	g_SceneMgr->Render();
 	glutSwapBuffers();
 }
@@ -47,13 +37,15 @@ void Idle(void)
 		if (g_Obj[i].GetDraw())
 			g_Obj[i].Update();
 	}*/
-	g_SceneMgr->Update();
+	DWORD CurrTime = timeGetTime();
+	DWORD elapsedTime = CurrTime - g_prevTime;
+	g_prevTime = CurrTime;
+	g_SceneMgr->Update((float)elapsedTime);
 	RenderScene();
 }
 
 void MouseInput(int button, int state, int x, int y)
 {
-	RenderScene();
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
 	{
 		/*g_Obj[Count].Initialize();
@@ -70,6 +62,7 @@ void MouseInput(int button, int state, int x, int y)
 			Count = 0;*/
 		g_SceneMgr->Mouse(x, y);
 	}
+	RenderScene();
 }
 
 void KeyInput(unsigned char key, int x, int y)
@@ -102,26 +95,19 @@ int main(int argc, char **argv)
 		std::cout << "GLEW 3.0 not supported\n ";
 	}
 
-	// Initialize Renderer
-	/*g_Renderer = new Renderer(WinX, WinY);
-	if (!g_Renderer->IsInitialized())
-	{
-		std::cout << "Renderer could not be initialized.. \n";
-	}
-
-	g_Obj = new CObj[Size];*/
-	g_SceneMgr->Init();
-
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
 	glutKeyboardFunc(KeyInput);
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
+	g_SceneMgr = new CSceneMgr(WinX, WinY);
+	g_prevTime = timeGetTime();
 
 	glutMainLoop();
 
 	g_SceneMgr->Release();
 	delete g_SceneMgr;
+
     return 0;
 }
 

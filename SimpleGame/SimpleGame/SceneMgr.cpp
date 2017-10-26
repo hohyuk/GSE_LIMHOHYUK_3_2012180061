@@ -1,20 +1,15 @@
 #include "stdafx.h"
 #include "SceneMgr.h"
 
-#include "Renderer.h"
-#include "CObj.h"
-
-const int WinX{ 500 };
-const int WinY{ 500 };
-const int Size{ 50 };
-int Count{ 0 };
-
-Renderer *g_Renderer = NULL;
-CObj* g_Obj = NULL;
 CSceneMgr::CSceneMgr()
 {
 }
 
+CSceneMgr::CSceneMgr(int width_, int height_)
+	:m_WinX(width_),m_WinY(height_)
+{
+	Init();
+}
 
 CSceneMgr::~CSceneMgr()
 {
@@ -22,90 +17,102 @@ CSceneMgr::~CSceneMgr()
 
 void CSceneMgr::Init()
 {
-	g_Renderer = new Renderer(WinX, WinY);
-	if (!g_Renderer->IsInitialized())
+	m_render = new Renderer(m_WinX, m_WinY);
+	if (!m_render->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";
 	}
-
-	g_Obj = new CObj[Size];
+	for (int i = 0; i < MAX_COUNT; ++i)
+		m_Obj[i] = NULL;
+	colcount = 0;
+	mousecount = -1;
 }
 
 void CSceneMgr::Render()
 {
-	for (int i = 0; i < Size; ++i)
+	for (int i = 0; i < MAX_COUNT; ++i)
 	{
-		if (g_Obj[i].GetDraw())
-			g_Renderer->DrawSolidRect(g_Obj[i].GetXpos(), g_Obj[i].GetYpos(), g_Obj[i].GetZpos(), g_Obj[i].GetSize(), g_Obj[i].GetcolorR(), g_Obj[i].GetcolorG(), g_Obj[i].GetcolorB(), 1);
+		if (m_Obj[i] != NULL)
+		{
+			if (m_Obj[i]->GetLifeTime() < 0.f || m_Obj[i]->GetLife() < 0.f)
+			{
+				delete m_Obj[i];
+				m_Obj[i] = NULL;
+				mousecount = i - 1;
+			}
+			else
+			{
+				m_render->DrawSolidRect(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), m_Obj[i]->GetZpos(), m_Obj[i]->GetSize()
+					, m_Obj[i]->GetcolorR(), m_Obj[i]->GetcolorG(), m_Obj[i]->GetcolorB(), 1);
+			}
+		}
 	}
 }
 
-void CSceneMgr::Update()
+void CSceneMgr::Update(float elapsedTime)
 {
-	for (int i = 0; i < Size; ++i)
+	BoxCollision();
+	for (int i = 0; i < MAX_COUNT; ++i)
 	{
-		if (g_Obj[i].GetDraw())
-			g_Obj[i].Update();
-	}
-
-	for (int i = 0; i < Size; ++i)
-	{
-		
-		for (int j = 0; j < Size; ++j)
+		if (m_Obj[i] != NULL)
 		{
-			if (i != j)
-			{
-				float minX1 = g_Obj[i].GetXpos() - g_Obj[i].GetSize() / 2;
-				float minY1 = g_Obj[i].GetYpos() - g_Obj[i].GetSize() / 2;
-				float maxX1 = g_Obj[i].GetXpos() + g_Obj[i].GetSize() / 2;
-				float maxY1 = g_Obj[i].GetYpos() + g_Obj[i].GetSize() / 2;
-
-				float minX2 = g_Obj[j].GetXpos() - g_Obj[j].GetSize() / 2;
-				float minY2 = g_Obj[j].GetYpos() - g_Obj[j].GetSize() / 2;
-				float maxX2 = g_Obj[j].GetXpos() + g_Obj[j].GetSize() / 2;
-				float maxY2 = g_Obj[j].GetYpos() + g_Obj[j].GetSize() / 2;
-
-				if (BoxBoxCollision(minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2))
-				{
-					g_Obj[i].SetColor(1, 0, 0);
-					g_Obj[j].SetColor(1, 0, 0);
-				}
-			}
+			m_Obj[i]->Update(elapsedTime);
 		}
 	}
 }
 
 void CSceneMgr::Mouse(int x,int y)
 {
-	g_Obj[Count].Initialize();
-	g_Obj[Count].SetDraw(true);
-	float resetX = float(x - WinX / 2);
-	float resetY = float(-(y - WinY / 2));
-	g_Obj[Count].SetPos(resetX, resetY);
-
-	std::cout << "" << std::endl;
-	std::cout << "Count : " << Count << std::endl;
-	std::cout << "x = " << resetX << " , y = " << resetY << std::endl;
-	Count++;
-	if (Count > Size - 1)
-		Count = 0;
+	if (mousecount < MAX_COUNT)
+	{
+		++mousecount;
+		if (m_Obj[mousecount] == NULL)
+		{
+			float resetX = float(x - m_WinX / 2);
+			float resetY = float(-(y - m_WinY / 2));
+			m_Obj[mousecount] = new CObj(resetX, resetY);
+		}
+	}
 }
 
-bool CSceneMgr::BoxBoxCollision(float minX1, float minY1, float maxX1, float maxY1, float minX2, float minY2, float maxX2, float maxY2)
+void CSceneMgr::BoxCollision()
 {
-	if (minX1 > maxX2)
-		return false;
-	if (minY1 > maxY2)
-		return false;
-	if (maxX1 < maxX2)
-		return false;
-	if (maxY1 < maxY2)
-		return false;
-	return true;
+	for (int i = 0; i < MAX_COUNT; ++i)
+	{
+		colcount = 0;
+		if (m_Obj[i] != NULL)
+		{
+			for (int j = 0; j < MAX_COUNT; ++j)
+			{
+				if (m_Obj[j] != NULL)
+				{
+					if (i != j)
+					{
+						float width = m_Obj[i]->GetXpos() - m_Obj[j]->GetXpos();
+						float height = m_Obj[i]->GetYpos() - m_Obj[j]->GetYpos();
+						float distance = sqrtf((width*width) + (height*height));
+						if (distance < m_Obj[i]->GetSize())
+						{
+							colcount++;
+						}
+					}
+				}
+			}
+			if (colcount > 0)
+			{
+				m_Obj[i]->SetColor(1, 0, 0);
+			}
+			else
+			{
+				m_Obj[i]->SetColor(1, 1, 1);
+			}
+		}
+	}
 }
 
 void CSceneMgr::Release()
 {
-	delete g_Renderer;
-	delete[] g_Obj;
+	delete m_render;
+	for (int i = 0; i < MAX_COUNT; ++i)
+		delete m_Obj[i];
 }
