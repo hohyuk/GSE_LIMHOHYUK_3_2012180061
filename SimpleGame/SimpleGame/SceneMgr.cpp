@@ -23,13 +23,29 @@ void CSceneMgr::Init()
 		std::cout << "Renderer could not be initialized.. \n";
 	}
 	for (int i = 0; i < MAX_COUNT; ++i)
+	{
 		m_Obj[i] = NULL;
+		m_Bbullet[i] = NULL;
+	}
+		
 	colcount = 0;
 	mousecount = -1;
+
+	// building
+	m_building = new CObj();
+	m_building->AddActorObject(0, 0, OBJECT_BUILDING);
+	time = 0;
+	count = 0;
 }
 
 void CSceneMgr::Render()
 {
+	if (m_building != NULL)
+	{
+		m_render->DrawSolidRect(m_building->GetXpos(), m_building->GetYpos(), m_building->GetZpos(), m_building->GetSize()
+			, m_building->GetcolorR(), m_building->GetcolorG(), m_building->GetcolorB(), 1);
+	}
+	
 	for (int i = 0; i < MAX_COUNT; ++i)
 	{
 		if (m_Obj[i] != NULL)
@@ -47,16 +63,55 @@ void CSceneMgr::Render()
 			}
 		}
 	}
+
+	for (int i = 0; i < MAX_COUNT; ++i)
+	{
+		if (m_Bbullet[i] != NULL)
+		{
+			if (m_Bbullet[i]->GetLife() < 0.f)
+			{
+				delete m_Bbullet[i];
+				m_Bbullet[i] = NULL;
+			}
+			else
+			{
+				m_render->DrawSolidRect(m_Bbullet[i]->GetXpos(), m_Bbullet[i]->GetYpos(), m_Bbullet[i]->GetZpos(), m_Bbullet[i]->GetSize()
+					, m_Bbullet[i]->GetcolorR(), m_Bbullet[i]->GetcolorG(), m_Bbullet[i]->GetcolorB(), 1);
+			}
+		}
+	}
 }
 
 void CSceneMgr::Update(float elapsedTime)
 {
 	BoxCollision();
+	Collision();
 	for (int i = 0; i < MAX_COUNT; ++i)
 	{
 		if (m_Obj[i] != NULL)
 		{
 			m_Obj[i]->Update(elapsedTime);
+		}
+	}
+	time += elapsedTime;
+	if (time > 150)
+	{
+		time = 0;
+		if (count < MAX_COUNT)
+		{
+			if (m_building != NULL)
+			{
+				m_Bbullet[count] = new CObj();
+				m_Bbullet[count++]->AddActorObject(m_building->GetXpos(), m_building->GetYpos(), OBJECT_BULLET);
+			}
+		}
+	}
+	for (int i = 0; i < MAX_COUNT; ++i)
+	{
+		if (m_Bbullet[i] != NULL)
+		{
+			
+			m_Bbullet[i]->Update(elapsedTime);
 		}
 	}
 }
@@ -105,6 +160,40 @@ void CSceneMgr::BoxCollision()
 			else
 			{
 				m_Obj[i]->SetColor(1, 1, 1);
+			}
+		}
+	}
+}
+
+void CSceneMgr::Collision()
+{
+	for (int i = 0; i < MAX_COUNT; ++i)
+	{
+		if (m_Obj[i] != NULL && m_building != NULL)
+		{
+			float width = m_Obj[i]->GetXpos() - m_building->GetXpos();
+			float height = m_Obj[i]->GetYpos() - m_building->GetYpos();
+			float distance = sqrtf((width*width) + (height*height));
+			if (distance < m_building->GetSize()/2.f)
+			{
+				m_Obj[i]->SetLife(50);
+				m_building->SetLife(5);
+				std::cout << m_building->GetLife() << std::endl;
+				if (m_Obj[i]->GetLife() < 0)
+				{
+					delete m_Obj[i];
+					m_Obj[i] = NULL;
+				}
+				if (m_building->GetLife() < 0)
+				{
+					for (int i = 0; i < MAX_COUNT; ++i)
+					{
+						delete m_Bbullet[i];
+						m_Bbullet[i] = NULL;
+					}
+					delete m_building;
+					m_building = NULL;	
+				}
 			}
 		}
 	}

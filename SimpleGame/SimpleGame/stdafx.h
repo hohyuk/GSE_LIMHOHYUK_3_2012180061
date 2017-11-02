@@ -9,3 +9,11 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+
+enum OBJTYPE
+{
+	OBJECT_BUILDING,
+	OBJECT_CHARACTER,
+	OBJECT_BULLET,
+	OBJECT_ARROW
+};

@@ -18,15 +18,17 @@ public:
 
 	void SetPos(float x, float y) { xPos = x, yPos = y; }
 	void SetColor(float r, float g, float b) { colR = r, colG = g, colB = b; }
-	void SetLife(float life) { m_life = life; }
+	void SetLife(float life) { m_life -= life; }
 	
 
 	void Initialize();
 	void Update(float elapsedTime);
 	
+	void AddActorObject(float xpos, float ypos, OBJTYPE type);
 private:
 	void moveobject(float elapsedTime);
 	void lifetime(float elapsedTime);
+
 private:
 	float xPos, yPos, zPos;
 	float colR, colG, colB;
