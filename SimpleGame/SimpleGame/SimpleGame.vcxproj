@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CObj.h" />
+    <ClInclude Include="Refer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SceneMgr.h" />
     <ClInclude Include="stdafx.h" />

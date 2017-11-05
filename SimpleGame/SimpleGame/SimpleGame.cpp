@@ -7,61 +7,47 @@ it under the terms of the What The Hell License. Do it plz.
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY.
 */
+
 #include "stdafx.h"
-#include <iostream>
+//#include <iostream>
+#include "SceneMgr.h"
+
+
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
-#include "SceneMgr.h"
-#include "CObj.h"
 
-const int WinX{ 500 };
-const int WinY{ 500 };
 
-CSceneMgr * g_SceneMgr = NULL;
+DWORD prevTime = timeGetTime();
 
-DWORD g_prevTime = 0;
+CSceneMgr *g_SceneMgr = NULL;
+
 void RenderScene(void)
 {
+	DWORD curTime = timeGetTime();
+	DWORD elapsedTime = curTime - prevTime;		// 경과시간 = 현재시간 - 과거시간.
+	prevTime = curTime;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
-	
+
+	g_SceneMgr->Update(float(elapsedTime));
 	g_SceneMgr->Render();
 	glutSwapBuffers();
 }
 
 void Idle(void)
 {
-	/*for (int i = 0; i < Size; ++i)
-	{
-		if (g_Obj[i].GetDraw())
-			g_Obj[i].Update();
-	}*/
-	DWORD CurrTime = timeGetTime();
-	DWORD elapsedTime = CurrTime - g_prevTime;
-	g_prevTime = CurrTime;
-	g_SceneMgr->Update((float)elapsedTime);
 	RenderScene();
 }
 
 void MouseInput(int button, int state, int x, int y)
 {
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
-	{
-		/*g_Obj[Count].Initialize();
-		g_Obj[Count].SetDraw(true);
-		float resetX = float(x - WinX / 2);
-		float resetY = float(-(y - WinY / 2));
-		g_Obj[Count].SetPos(resetX, resetY);
+	bool Lbutton = button == GLUT_LEFT_BUTTON && state == GLUT_DOWN;
 
-		std::cout << "" << std::endl;
-		std::cout << "Count : " << Count << std::endl;
-		std::cout << "x = " << resetX << " , y = " << resetY <<  std::endl;
-		Count++;
-		if (Count > Size - 1)
-			Count = 0;*/
-		g_SceneMgr->Mouse(x, y);
-	}
+	// 마우스 클릭 오브젝트 생성.
+	if (Lbutton)
+		g_SceneMgr->CreateObj(x, y);
+
 	RenderScene();
 }
 
@@ -81,8 +67,8 @@ int main(int argc, char **argv)
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(WinX, WinY);
+	glutInitWindowPosition(100, 100);
+	glutInitWindowSize(Width, Height);
 	glutCreateWindow("Game Software Engineering KPU");
 
 	glewInit();
@@ -95,19 +81,22 @@ int main(int argc, char **argv)
 		std::cout << "GLEW 3.0 not supported\n ";
 	}
 
+	// SceneMgr 객체 생성
+	g_SceneMgr = new CSceneMgr();
+
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
 	glutKeyboardFunc(KeyInput);
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
-	g_SceneMgr = new CSceneMgr(WinX, WinY);
-	g_prevTime = timeGetTime();
+
 
 	glutMainLoop();
 
+	// 객체 삭제
 	g_SceneMgr->Release();
 	delete g_SceneMgr;
 
-    return 0;
+	return 0;
 }
 
