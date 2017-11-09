@@ -2,7 +2,7 @@
 #include "Renderer.h"
 #include "CObj.h"
 
-const int MAX_OBJ_COUNT{ 10 };
+const int MAX_OBJ_COUNT{ 50 };
 class CSceneMgr
 {
 public:
