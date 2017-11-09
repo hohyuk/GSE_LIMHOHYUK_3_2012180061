@@ -49,6 +49,12 @@ void CObj::AddActorObject(float xpos, float ypos, OBJTYPE type)
 		m_life = 20;
 		break;
 	case OBJECT_ARROW:
+		size = 5;
+		colG = 1.f;
+		colR = colB = 0.f;
+		speedX = 100.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		speedY = 100.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		m_life = 10;
 		break;
 	}
 }

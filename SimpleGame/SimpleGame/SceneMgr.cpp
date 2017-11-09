@@ -24,11 +24,16 @@ void CSceneMgr::Init()
 	obj_count = 0;
 	bullet_count = 0;
 	bullet_time = 0;
-
+	arrowCount = 0;
+	arrowTime = 0;
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
 		m_Obj[i] = NULL;
 		m_Bullet[i] = NULL;
+		for (int j = 0; j < MAX_ARROW_COUNT; ++j)
+		{
+			m_Arrow[i][j] = NULL;
+		}
 	}
 	// Building ÃÊ±âÈ­
 	m_Building = new CObj(0, 0, OBJECT_BUILDING);
@@ -38,6 +43,7 @@ void CSceneMgr::Update(float elapsedTime)
 {
 	CharacterCollision();
 	CreateBullet(elapsedTime);
+	CreateArrow(elapsedTime);
 	BulletCollision();
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
@@ -45,12 +51,30 @@ void CSceneMgr::Update(float elapsedTime)
 		{
 			if (m_Obj[i]->GetLifeTime() < 0)
 			{
+				for (int j = 0; j < MAX_ARROW_COUNT; ++j)
+				{
+					if (m_Arrow[i][j] != NULL)
+					{
+						delete m_Arrow[i][j];
+						m_Arrow[i][j] = NULL;
+					}
+				}
 				delete m_Obj[i];
 				m_Obj[i] = NULL;
 				break;
 			}
 			else
+			{
 				m_Obj[i]->Update(elapsedTime);
+				for (int j = 0; j < MAX_ARROW_COUNT; ++j)
+				{
+					if (m_Arrow[i][j] != NULL)
+					{
+						m_Arrow[i][j]->Update(elapsedTime);
+					}
+				}
+			}
+				
 
 			// Building Collision
 			if (m_Building != NULL)
@@ -64,8 +88,6 @@ void CSceneMgr::Update(float elapsedTime)
 
 void CSceneMgr::CreateObj(int x, int y)
 {
-
-
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
 		if (m_Obj[i] == NULL)
@@ -83,6 +105,7 @@ void CSceneMgr::Render()
 	Character_render();
 	Building_render();
 	Bullet_render();
+	Arrow_render();
 }
 
 void CSceneMgr::Release()
@@ -164,6 +187,22 @@ void CSceneMgr::CreateBullet(float elapsedTime)
 	}
 }
 
+void CSceneMgr::CreateArrow(float elapsedTime)
+{
+	arrowTime += elapsedTime / 1000.f;
+	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
+	{
+		if (m_Obj[i] != NULL)
+		{
+			if ((arrowCount < MAX_ARROW_COUNT) && arrowTime > 0.5)
+			{
+				m_Arrow[i][arrowCount++] = new CObj(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), OBJECT_ARROW);
+				arrowTime = 0.f;
+			}
+		}
+	}
+}
+
 void CSceneMgr::BulletCollision()
 {
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
@@ -209,8 +248,11 @@ void CSceneMgr::Building_render()
 {
 	if (m_Building != NULL)
 	{
-		m_Renderer->DrawSolidRect(m_Building->GetXpos(), m_Building->GetYpos(), 0, m_Building->GetSize()
-			, m_Building->GetcolorR(), m_Building->GetcolorG(), m_Building->GetcolorB(), 1);
+		GLint m_texCharacter = m_Renderer->CreatePngTexture("../Resource/pika.png");
+		/*m_Renderer->DrawSolidRect(m_Building->GetXpos(), m_Building->GetYpos(), 0, m_Building->GetSize()
+			, m_Building->GetcolorR(), m_Building->GetcolorG(), m_Building->GetcolorB(), 1);*/
+		m_Renderer->DrawTexturedRect(m_Building->GetXpos(), m_Building->GetYpos(), 0, m_Building->GetSize()
+			, m_Building->GetcolorR(), m_Building->GetcolorG(), m_Building->GetcolorB(), 1, m_texCharacter);
 	}
 }
 
@@ -222,6 +264,25 @@ void CSceneMgr::Bullet_render()
 		{
 			m_Renderer->DrawSolidRect(m_Bullet[i]->GetXpos(), m_Bullet[i]->GetYpos(), 0, m_Bullet[i]->GetSize()
 				, m_Bullet[i]->GetcolorR(), m_Bullet[i]->GetcolorG(), m_Bullet[i]->GetcolorB(), 1);
+		}
+	}
+}
+
+void CSceneMgr::Arrow_render()
+{
+	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
+	{
+		if (m_Obj[i] != NULL)
+		{
+			for (int j = 0; j < MAX_ARROW_COUNT; ++j)
+			{
+				if (m_Arrow[i][j] != NULL)
+				{
+					m_Renderer->DrawSolidRect(m_Arrow[i][j]->GetXpos(), m_Arrow[i][j]->GetYpos(), 0, m_Arrow[i][j]->GetSize()
+						, m_Arrow[i][j]->GetcolorR(), m_Arrow[i][j]->GetcolorG(), m_Arrow[i][j]->GetcolorB(), 1);
+				}
+				
+			}
 		}
 	}
 }

@@ -156,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CObj.h" />
+    <ClInclude Include="LoadPng.h" />
     <ClInclude Include="Refer.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SceneMgr.h" />
@@ -164,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CObj.cpp" />
+    <ClCompile Include="LoadPng.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneMgr.cpp" />
     <ClCompile Include="SimpleGame.cpp" />
@@ -177,6 +179,10 @@
   <ItemGroup>
     <None Include="Shaders\SolidRect.fs" />
     <None Include="Shaders\SolidRect.vs" />
+    <None Include="Shaders\SolidRectWithTexture.fs" />
+    <None Include="Shaders\SolidRectWithTexture.vs" />
+    <None Include="Shaders\SolidRectWithTextureSeq.fs" />
+    <None Include="Shaders\SolidRectWithTextureSeq.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
