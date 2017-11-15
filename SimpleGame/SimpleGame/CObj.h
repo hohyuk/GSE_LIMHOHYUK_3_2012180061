@@ -14,6 +14,7 @@ public:
 	float GetcolorB() { return colB; }
 	float GetLife() { return m_life; }
 	float GetLifeTime() { return m_lifeTime; }
+	OBJTYPE GetType() { return m_type; }
 	void SetColor(float r, float g, float b) { colR = r, colG = g, colB = b; }
 	void SetLife(float life) { m_life -= life; }
 
@@ -29,6 +30,7 @@ private:
 	float speedX, speedY;
 	float m_life;
 	float m_lifeTime;
+	OBJTYPE m_type;
 	float ElapsedTime;
 };
 

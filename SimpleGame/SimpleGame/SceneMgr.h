@@ -18,10 +18,11 @@ public:
 
 private:
 	bool Collision(float x1, float y1, float x2, float y2, float size1, float size2);
+	bool Collision1(float x1, float y1, float size1, float x2, float y2, float size2);
 	void CharacterCollision();
 	void BuildingCollision(CObj* &obj);
 	void CreateBullet(float elapsedTime);
-	void CreateArrow(float elapsedTime);
+	void CreateArrow(float elapsedTime,int count);
 	void BulletCollision();
 	void Character_render();
 	void Building_render();
@@ -30,6 +31,7 @@ private:
 private:
 	Renderer* m_Renderer;
 
+	CObj* m_Objs[MAX_OBJ_COUNT];
 	CObj* m_Obj[MAX_OBJ_COUNT];
 	CObj* m_Bullet[MAX_OBJ_COUNT];
 	CObj* m_Building;

@@ -20,7 +20,7 @@ void CObj::AddActorObject(float xpos, float ypos, OBJTYPE type)
 {
 	xPos = xpos;
 	yPos = ypos;
-
+	m_type = type;
 	switch (type)
 	{
 	case OBJECT_CHARACTER:
@@ -71,21 +71,24 @@ void CObj::objmove()
 	// ElapsedTime / 1000.f -> 0.01sec
 	xPos += speedX * (ElapsedTime / 1000.f);
 	yPos += speedY * (ElapsedTime / 1000.f);
-	if (xPos > Width / 2)
+	if (m_type == OBJECT_CHARACTER)
 	{
-		speedX = -speedX;
-	}
-	else if (xPos < -Width / 2)
-	{
-		speedX = -speedX;
-	}
-	if (yPos > Height / 2)
-	{
-		speedY = -speedY;
-	}
-	else if (yPos < -Height / 2)
-	{
-		speedY = -speedY;
+		if (xPos > Width / 2)
+		{
+			speedX = -speedX;
+		}
+		else if (xPos < -Width / 2)
+		{
+			speedX = -speedX;
+		}
+		if (yPos > Height / 2)
+		{
+			speedY = -speedY;
+		}
+		else if (yPos < -Height / 2)
+		{
+			speedY = -speedY;
+		}
 	}
 }
 

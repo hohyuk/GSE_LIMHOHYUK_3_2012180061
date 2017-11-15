@@ -28,6 +28,7 @@ void CSceneMgr::Init()
 	arrowTime = 0;
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
+		//m_Objs[i] = NULL;			// CHARACTER, BUILDING 객체들
 		m_Obj[i] = NULL;
 		m_Bullet[i] = NULL;
 		for (int j = 0; j < MAX_ARROW_COUNT; ++j)
@@ -36,6 +37,7 @@ void CSceneMgr::Init()
 		}
 	}
 	// Building 초기화
+	//m_Objs[0]= new CObj(0, 0, OBJECT_BUILDING);
 	m_Building = new CObj(0, 0, OBJECT_BUILDING);
 }
 
@@ -43,12 +45,24 @@ void CSceneMgr::Update(float elapsedTime)
 {
 	CharacterCollision();
 	CreateBullet(elapsedTime);
-	CreateArrow(elapsedTime);
+	
 	BulletCollision();
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
-		if (m_Obj[i] != NULL)
+		bool isNotNULL = m_Obj[i] != NULL;
+
+		if (isNotNULL)
 		{
+			arrowTime += elapsedTime / 1000.f;
+
+			if (m_Obj[i] != NULL)
+			{
+				if ((arrowCount < MAX_ARROW_COUNT) && arrowTime > 0.5)
+				{
+					m_Arrow[i][arrowCount++] = new CObj(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), OBJECT_ARROW);
+					arrowTime = 0.f;
+				}
+			}
 			if (m_Obj[i]->GetLifeTime() < 0)
 			{
 				for (int j = 0; j < MAX_ARROW_COUNT; ++j)
@@ -75,7 +89,6 @@ void CSceneMgr::Update(float elapsedTime)
 				}
 			}
 				
-
 			// Building Collision
 			if (m_Building != NULL)
 				BuildingCollision(m_Obj[i]);
@@ -133,6 +146,29 @@ bool CSceneMgr::Collision(float x1, float y1, float x2, float y2, float size1, f
 	return false;
 }
 
+bool CSceneMgr::Collision1(float x1, float y1, float size1, float x2, float y2, float size2)
+{
+	float left1 = x1 - size1 / 2.f;
+	float bottom1 = y1 - size1 / 2.f;
+	float right1 = x1 + size1 / 2.f;
+	float top1 = y1 + size1 / 2.f;
+
+	float left2 = x2 - size2 / 2.f;
+	float bottom2 = y2 - size2 / 2.f;
+	float right2 = x2 + size2 / 2.f;
+	float top2 = y2 + size2 / 2.f;
+
+	if (left1 > right2)
+		return false;
+	if (right1 < left2)
+		return false;
+	if (bottom1 > top2)
+		return false;
+	if (top1 < bottom2)
+		return false;
+	return true;
+}
+
 void CSceneMgr::CharacterCollision()
 {
 	bool collisionCount = false;
@@ -161,7 +197,7 @@ void CSceneMgr::CharacterCollision()
 
 void CSceneMgr::BuildingCollision(CObj *& obj)
 {
-	if (Collision(obj->GetXpos(), obj->GetYpos(), m_Building->GetXpos(), m_Building->GetYpos(), obj->GetXpos(), m_Building->GetSize()))
+	if (Collision1(obj->GetXpos(), obj->GetYpos(), obj->GetXpos(), m_Building->GetXpos(), m_Building->GetYpos(), m_Building->GetSize()))
 	{
 		m_Building->SetLife(obj->GetLife());
 		if (m_Building->GetLife() < 0)
@@ -187,20 +223,19 @@ void CSceneMgr::CreateBullet(float elapsedTime)
 	}
 }
 
-void CSceneMgr::CreateArrow(float elapsedTime)
+void CSceneMgr::CreateArrow(float elapsedTime, int count)
 {
 	arrowTime += elapsedTime / 1000.f;
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
+	
+	if (m_Obj[count] != NULL)
 	{
-		if (m_Obj[i] != NULL)
+		if ((arrowCount < MAX_ARROW_COUNT) && arrowTime > 0.5)
 		{
-			if ((arrowCount < MAX_ARROW_COUNT) && arrowTime > 0.5)
-			{
-				m_Arrow[i][arrowCount++] = new CObj(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), OBJECT_ARROW);
-				arrowTime = 0.f;
-			}
+			m_Arrow[count][arrowCount++] = new CObj(m_Obj[count]->GetXpos(), m_Obj[count]->GetYpos(), OBJECT_ARROW);
+			arrowTime = 0.f;
 		}
 	}
+	
 }
 
 void CSceneMgr::BulletCollision()
