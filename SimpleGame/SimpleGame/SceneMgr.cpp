@@ -61,6 +61,7 @@ void CSceneMgr::Update(float elapsedTime)
 				m_Objs[i]->Update(elapsedTime);
 
 				CreateBullet(m_Objs[i]);
+				CreateArrow(m_Objs[i]);
 			}
 			else
 			{
@@ -183,55 +184,64 @@ bool CSceneMgr::ObjTypeCompare(CObj* & Obj_1, CObj* & Obj_2)
 	if (Obj_1->GetTeam() == Obj_2->GetTeam())
 		return false;
 
-	// character 구별
-	bool isCharacter = Obj_1->GetType() == OBJECT_CHARACTER;
-	bool isCompare = Obj_1->GetType() == Obj_2->GetType();
-	bool isSame = isCharacter && isCompare;
-
 	// Building and Bullet 충돌
 	ObjTypeCollision(Obj_1, Obj_2);
 	ObjTypeCollision(Obj_2, Obj_1);
 
-	if (isSame)
-		return false;
+	
 
 	return true;
 }
 
-bool CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
+void CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
 {
 	// character 구별
 	bool isCharacter1 = Obj_1->GetType() == OBJECT_CHARACTER;
 	bool isBuilding1 = Obj_1->GetType() == OBJECT_BUILDING;
 	bool isBullet1 = Obj_1->GetType() == OBJECT_BULLET;
-	bool isArrow1 = Obj_1->GetType() == OBJECT_BULLET;
+	bool isArrow1 = Obj_1->GetType() == OBJECT_ARROW;
 
 	bool isCharacter2 = Obj_2->GetType() == OBJECT_CHARACTER;
 	bool isBuilding2 = Obj_2->GetType() == OBJECT_BUILDING;
 	bool isBullet2 = Obj_2->GetType() == OBJECT_BULLET;
-	bool isArrow2 = Obj_2->GetType() == OBJECT_BULLET;
+	bool isArrow2 = Obj_2->GetType() == OBJECT_ARROW;
+
+	// CHARACTER와 충돌들.
+	if (isCharacter1 && isCharacter2)
+	{
+		Obj_1->SetDamage(10);
+		Obj_2->SetDamage(10);
+	}
 
 	if (isCharacter1 && isBuilding2)
 	{
 		Obj_2->SetDamage(Obj_1->GetLife());
 		Obj_1->SetLife(0);
-		return true;
 	}
 
 	if (isCharacter1 && isBullet2)
 	{
 		Obj_1->SetDamage(Obj_2->GetLife());
 		Obj_2->SetLife(0);
-		return true;
 	}
 
-	if (isCharacter1 && isCharacter2)
+	if (isCharacter1 && isArrow2)
 	{
-		Obj_1->SetDamage(10);
-		Obj_2->SetDamage(10);
-		cout << "a" << endl;
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
 	}
-	return false;
+	// 빌딩들과 충돌
+	if (isBuilding1 && isBullet2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
+	if (isBuilding1 && isArrow2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
+
 }
 
 void CSceneMgr::CreateBullet(CObj *& Obj)
@@ -242,6 +252,17 @@ void CSceneMgr::CreateBullet(CObj *& Obj)
 	{
 		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_BULLET);
 		Obj->ReSetBulletTime();
+	}
+}
+
+void CSceneMgr::CreateArrow(CObj *& Obj)
+{
+	bool isType = Obj->GetType() == OBJECT_CHARACTER;
+	bool isTime = Obj->GetArrowTime() > 3.f;		// 10초당 1발씩.
+	if (isType && isTime)
+	{
+		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_ARROW);
+		Obj->ReSetArrowTime();
 	}
 }
 

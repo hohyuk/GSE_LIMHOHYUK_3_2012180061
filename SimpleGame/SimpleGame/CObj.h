@@ -24,8 +24,6 @@ public:
 	// е╦юс
 	float GetBulletTime() { return m_bulletTime; }
 	void ReSetBulletTime() { m_bulletTime = 0.f; }
-	float GetCharacterTime() { return m_characterTime; }
-	void ReSetCharacterTime() { m_characterTime = 0.f; }
 	float GetArrowTime() { return m_arrowTime; }
 	void ReSetArrowTime() { m_arrowTime = 0.f; }
 
@@ -43,7 +41,6 @@ private:
 	OBJTYPE m_type;
 	
 	float m_bulletTime;
-	float m_characterTime;
 	float m_arrowTime;
 	float ElapsedTimeSecond;
 };

@@ -18,8 +18,9 @@ private:
 	bool CollisionObjs(CObj* & Obj_1, CObj* & Obj_2);
 	void CollisionCompare();
 	bool ObjTypeCompare(CObj* & Obj_1, CObj* & Obj_2);
-	bool ObjTypeCollision(CObj* & Obj_1, CObj* & Obj_2);
+	void ObjTypeCollision(CObj* & Obj_1, CObj* & Obj_2);
 	void CreateBullet(CObj*& Obj);
+	void CreateArrow(CObj*& Obj);
 	void CreateCharacter(float elapsedTime);
 private:
 	Renderer* m_Renderer;
