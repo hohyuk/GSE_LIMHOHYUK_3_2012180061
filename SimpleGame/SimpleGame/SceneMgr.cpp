@@ -1,323 +1,261 @@
 #include "stdafx.h"
 #include "SceneMgr.h"
 
-
 CSceneMgr::CSceneMgr()
 {
+	m_Renderer = new Renderer(Width, Height);
 	Init();
 }
 
-
 CSceneMgr::~CSceneMgr()
 {
+	this->Release();
 }
 
 void CSceneMgr::Init()
 {
-	m_Renderer = new Renderer(Width, Height);
-	if (!m_Renderer->IsInitialized())
-	{
-		std::cout << "Renderer could not be initialized.. \n";
-	}
-
-	// Obj 객체 Bullet 객체 초기화
-	obj_count = 0;
-	bullet_count = 0;
-	bullet_time = 0;
-	arrowCount = 0;
-	arrowTime = 0;
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
-		//m_Objs[i] = NULL;			// CHARACTER, BUILDING 객체들
-		m_Obj[i] = NULL;
-		m_Bullet[i] = NULL;
-		for (int j = 0; j < MAX_ARROW_COUNT; ++j)
+		m_Objs[i] = NULL;
+	}
+	// Player Building
+	AddActorObject(-150, -300, OBJECT_PLAYER, OBJECT_BUILDING);
+	AddActorObject(0, -300, OBJECT_PLAYER, OBJECT_BUILDING);
+	AddActorObject(150, -300, OBJECT_PLAYER, OBJECT_BUILDING);
+	// Enemy Building
+	AddActorObject(-150, 300, OBJECT_ENEMY, OBJECT_BUILDING);
+	AddActorObject(0, 300, OBJECT_ENEMY, OBJECT_BUILDING);
+	AddActorObject(150, 300, OBJECT_ENEMY, OBJECT_BUILDING);
+
+	// Enemy Character cooltime
+	m_characterTime = 5.f;
+}
+
+bool CSceneMgr::AddActorObject(float x, float y, OBJTYPE team, OBJTYPE type)
+{
+	// Objs의 NULL값을 찾고 NULL값에 객체를 저장한다.
+	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
+	{
+		if (m_Objs[i] == NULL)
 		{
-			m_Arrow[i][j] = NULL;
+			m_Objs[i] = new CObj(x, y, team, type);
+			if (m_Objs[i]->GetType() == OBJECT_CHARACTER)
+				cout << "x : " << x << " , " << "y : " << y << endl;
+			return true;
 		}
 	}
-	// Building 초기화
-	//m_Objs[0]= new CObj(0, 0, OBJECT_BUILDING);
-	m_Building = new CObj(0, 0, OBJECT_BUILDING);
+	cout << "CHARACTER FULL." << endl;
+	return false;
 }
 
 void CSceneMgr::Update(float elapsedTime)
 {
-	CharacterCollision();
-	CreateBullet(elapsedTime);
-	
-	BulletCollision();
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
+	CreateCharacter(elapsedTime);
+	CollisionCompare();
+	for (int i = 0; i < MAX_OBJ_COUNT; i++)
 	{
-		bool isNotNULL = m_Obj[i] != NULL;
-
-		if (isNotNULL)
+		if (m_Objs[i] != NULL)
 		{
-			arrowTime += elapsedTime / 1000.f;
+			if (m_Objs[i]->GetLife() > 0.f)
+			{
+				m_Objs[i]->Update(elapsedTime);
 
-			if (m_Obj[i] != NULL)
-			{
-				if ((arrowCount < MAX_ARROW_COUNT) && arrowTime > 0.5)
-				{
-					m_Arrow[i][arrowCount++] = new CObj(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), OBJECT_ARROW);
-					arrowTime = 0.f;
-				}
-			}
-			if (m_Obj[i]->GetLifeTime() < 0)
-			{
-				for (int j = 0; j < MAX_ARROW_COUNT; ++j)
-				{
-					if (m_Arrow[i][j] != NULL)
-					{
-						delete m_Arrow[i][j];
-						m_Arrow[i][j] = NULL;
-					}
-				}
-				delete m_Obj[i];
-				m_Obj[i] = NULL;
-				break;
+				CreateBullet(m_Objs[i]);
 			}
 			else
 			{
-				m_Obj[i]->Update(elapsedTime);
-				for (int j = 0; j < MAX_ARROW_COUNT; ++j)
-				{
-					if (m_Arrow[i][j] != NULL)
-					{
-						m_Arrow[i][j]->Update(elapsedTime);
-					}
-				}
+				delete m_Objs[i];
+				m_Objs[i] = NULL;
 			}
-				
-			// Building Collision
-			if (m_Building != NULL)
-				BuildingCollision(m_Obj[i]);
-		}
-
-		if (m_Bullet[i] != NULL)
-			m_Bullet[i]->Update(elapsedTime);
-	}
-}
-
-void CSceneMgr::CreateObj(int x, int y)
-{
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
-	{
-		if (m_Obj[i] == NULL)
-		{
-			float resetX = float(x - Width / 2);
-			float resetY = float(-(y - Height / 2));
-			m_Obj[i] = new CObj(resetX, resetY, OBJECT_CHARACTER);
-			break;
 		}
 	}
 }
 
 void CSceneMgr::Render()
 {
-	Character_render();
-	Building_render();
-	Bullet_render();
-	Arrow_render();
+	for (int i = 0; i < MAX_OBJ_COUNT; i++)
+	{
+		if (m_Objs[i] != NULL)
+		{
+			m_Renderer->DrawSolidRect(
+				m_Objs[i]->GetXpos(),
+				m_Objs[i]->GetYpos(),
+				0,
+				m_Objs[i]->GetSize(),
+				m_Objs[i]->GetcolorR(),
+				m_Objs[i]->GetcolorG(),
+				m_Objs[i]->GetcolorB(),
+				m_Objs[i]->GetcolorA()
+			);
+			// Building Obj
+			if (m_Objs[i]->GetType() == OBJECT_BUILDING)
+			{
+				GLint m_texCharacter;
+
+				if (m_Objs[i]->GetTeam() == OBJECT_PLAYER)
+					m_texCharacter = m_Renderer->CreatePngTexture("../Resource/building1.png");
+				else if (m_Objs[i]->GetTeam() == OBJECT_ENEMY)
+					m_texCharacter = m_Renderer->CreatePngTexture("../Resource/building2.png");
+
+				m_Renderer->DrawTexturedRect(
+					m_Objs[i]->GetXpos(),
+					m_Objs[i]->GetYpos(),
+					0,
+					m_Objs[i]->GetSize(),
+					m_Objs[i]->GetcolorR(),
+					m_Objs[i]->GetcolorG(),
+					m_Objs[i]->GetcolorB(),
+					m_Objs[i]->GetcolorA(),
+					m_texCharacter);
+			}
+		}
+	}
 }
 
 void CSceneMgr::Release()
 {
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
-		delete m_Obj[i];
-		m_Obj[i] = NULL;
-		delete m_Bullet[i];
-		m_Bullet[i];
+		delete m_Objs[i];
+		m_Objs[i] = NULL;
 	}
-	delete m_Building;
-	delete m_Renderer;
 }
 
-bool CSceneMgr::Collision(float x1, float y1, float x2, float y2, float size1, float size2)
+bool CSceneMgr::CollisionObjs(CObj *& Obj_1, CObj *& Obj_2)
 {
-	float width = x2 - x1;
-	float height = y2 - y1;
-	float distance = sqrtf((width * width) + (height * height));
-	float sizesum = (size1 / 2) + (size2 / 2);
-	if (distance < sizesum)
-		return true;
+	// Rect & Rect Collision.
+	float left_1, right_1, top_1, bottom_1;		// Obj_1
+	float left_2, right_2, top_2, bottom_2;		// Obj_2
 
-	return false;
-}
+	// Obj_1
+	left_1 = Obj_1->GetXpos() - Obj_1->GetSize() / 2.f;
+	right_1 = Obj_1->GetXpos() + Obj_1->GetSize() / 2.f;
+	bottom_1 = Obj_1->GetYpos() - Obj_1->GetSize() / 2.f;
+	top_1 = Obj_1->GetYpos() + Obj_1->GetSize() / 2.f;
 
-bool CSceneMgr::Collision1(float x1, float y1, float size1, float x2, float y2, float size2)
-{
-	float left1 = x1 - size1 / 2.f;
-	float bottom1 = y1 - size1 / 2.f;
-	float right1 = x1 + size1 / 2.f;
-	float top1 = y1 + size1 / 2.f;
+	// Obj_2
+	left_2 = Obj_2->GetXpos() - Obj_2->GetSize() / 2.f;
+	right_2 = Obj_2->GetXpos() + Obj_2->GetSize() / 2.f;
+	bottom_2 = Obj_2->GetYpos() - Obj_2->GetSize() / 2.f;
+	top_2 = Obj_2->GetYpos() + Obj_2->GetSize() / 2.f;
 
-	float left2 = x2 - size2 / 2.f;
-	float bottom2 = y2 - size2 / 2.f;
-	float right2 = x2 + size2 / 2.f;
-	float top2 = y2 + size2 / 2.f;
+	// Not Collision
+	if (left_1 > right_2)
+		return false;
+	if (right_1 < left_2)
+		return false;
 
-	if (left1 > right2)
+	if (bottom_1 > top_2)
 		return false;
-	if (right1 < left2)
+	if (top_1 < bottom_2)
 		return false;
-	if (bottom1 > top2)
-		return false;
-	if (top1 < bottom2)
-		return false;
+
+	// Collision
 	return true;
 }
 
-void CSceneMgr::CharacterCollision()
+void CSceneMgr::CollisionCompare()
 {
-	bool collisionCount = false;
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
-		collisionCount = false;
-		if (m_Obj[i] != NULL)
+		for (int j = 0; j < MAX_OBJ_COUNT; ++j)
 		{
-			for (int j = 0; j < MAX_OBJ_COUNT; ++j)
+			bool isNotSame = i != j;
+			bool isNotNull = m_Objs[i] != NULL && m_Objs[j] != NULL;
+			bool isSatisfy = isNotSame && isNotNull;		// 두 조건을 충족된다면.
+
+			if (isSatisfy)
 			{
-				if (i != j && m_Obj[j] != NULL)
+				if (CollisionObjs(m_Objs[i], m_Objs[j]))
 				{
-					if (Collision(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), m_Obj[j]->GetXpos(), m_Obj[j]->GetYpos(), m_Obj[i]->GetSize(), m_Obj[j]->GetSize()))
-					{
-						collisionCount = true;
-					}
+					ObjTypeCompare(m_Objs[i], m_Objs[j]);
 				}
+
 			}
-			if (collisionCount)
-				m_Obj[i]->SetColor(0.5, 0, 0);
-			else
-				m_Obj[i]->SetColor(1, 1, 1);
+
 		}
 	}
 }
 
-void CSceneMgr::BuildingCollision(CObj *& obj)
+bool CSceneMgr::ObjTypeCompare(CObj* & Obj_1, CObj* & Obj_2)
 {
-	if (Collision1(obj->GetXpos(), obj->GetYpos(), obj->GetXpos(), m_Building->GetXpos(), m_Building->GetYpos(), m_Building->GetSize()))
+	// 팀 구별
+	if (Obj_1->GetTeam() == Obj_2->GetTeam())
+		return false;
+
+	// character 구별
+	bool isCharacter = Obj_1->GetType() == OBJECT_CHARACTER;
+	bool isCompare = Obj_1->GetType() == Obj_2->GetType();
+	bool isSame = isCharacter && isCompare;
+
+	// Building and Bullet 충돌
+	ObjTypeCollision(Obj_1, Obj_2);
+	ObjTypeCollision(Obj_2, Obj_1);
+
+	if (isSame)
+		return false;
+
+	return true;
+}
+
+bool CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
+{
+	// character 구별
+	bool isCharacter1 = Obj_1->GetType() == OBJECT_CHARACTER;
+	bool isBuilding1 = Obj_1->GetType() == OBJECT_BUILDING;
+	bool isBullet1 = Obj_1->GetType() == OBJECT_BULLET;
+	bool isArrow1 = Obj_1->GetType() == OBJECT_BULLET;
+
+	bool isCharacter2 = Obj_2->GetType() == OBJECT_CHARACTER;
+	bool isBuilding2 = Obj_2->GetType() == OBJECT_BUILDING;
+	bool isBullet2 = Obj_2->GetType() == OBJECT_BULLET;
+	bool isArrow2 = Obj_2->GetType() == OBJECT_BULLET;
+
+	if (isCharacter1 && isBuilding2)
 	{
-		m_Building->SetLife(obj->GetLife());
-		if (m_Building->GetLife() < 0)
-		{
-			delete m_Building;
-			m_Building = NULL;
-		}
-		delete obj;
-		obj = NULL;
+		Obj_2->SetDamage(Obj_1->GetLife());
+		Obj_1->SetLife(0);
+		return true;
+	}
+
+	if (isCharacter1 && isBullet2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+		return true;
+	}
+
+	if (isCharacter1 && isCharacter2)
+	{
+		Obj_1->SetDamage(10);
+		Obj_2->SetDamage(10);
+		cout << "a" << endl;
+	}
+	return false;
+}
+
+void CSceneMgr::CreateBullet(CObj *& Obj)
+{
+	bool isType = Obj->GetType() == OBJECT_BUILDING;
+	bool isTime = Obj->GetBulletTime() > 10.f;		// 10초당 1발씩.
+	if (isType && isTime)
+	{
+		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_BULLET);
+		Obj->ReSetBulletTime();
 	}
 }
 
-void CSceneMgr::CreateBullet(float elapsedTime)
+void CSceneMgr::CreateCharacter(float elapsedTime)
 {
-	bullet_time += elapsedTime / 1000.f;
-	if (m_Building != NULL)
+	m_characterTime += elapsedTime / 1000.f;
+	bool isTime = m_characterTime > 5.f;	// 5초당 1발씩.
+
+	if (isTime)
 	{
-		if ((bullet_count < MAX_OBJ_COUNT) && bullet_time > 0.5)
-		{
-			m_Bullet[bullet_count++] = new CObj(m_Building->GetXpos(), m_Building->GetYpos(), OBJECT_BULLET);
-			bullet_time = 0.f;
-		}
+		float x = float(rand() % 400) - 180.f;
+		float y = float(rand() % 350) + 50.f;
+		AddActorObject(x, y, OBJECT_ENEMY, OBJECT_CHARACTER);
+		m_characterTime = 0.f;
 	}
 }
 
-void CSceneMgr::CreateArrow(float elapsedTime, int count)
-{
-	arrowTime += elapsedTime / 1000.f;
-	
-	if (m_Obj[count] != NULL)
-	{
-		if ((arrowCount < MAX_ARROW_COUNT) && arrowTime > 0.5)
-		{
-			m_Arrow[count][arrowCount++] = new CObj(m_Obj[count]->GetXpos(), m_Obj[count]->GetYpos(), OBJECT_ARROW);
-			arrowTime = 0.f;
-		}
-	}
-	
-}
-
-void CSceneMgr::BulletCollision()
-{
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
-	{
-		if (m_Obj[i] != NULL)
-		{
-			for (int j = 0; j < MAX_OBJ_COUNT; ++j)
-			{
-				if (m_Bullet[j] != NULL)
-				{
-					if (Collision(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), m_Bullet[j]->GetXpos(), m_Bullet[j]->GetYpos(), m_Obj[i]->GetSize(), m_Bullet[j]->GetSize()))
-					{
-						m_Obj[i]->SetLife(m_Bullet[j]->GetLife());
-
-						delete m_Bullet[j];
-						m_Bullet[j] = NULL;
-						if (m_Obj[i]->GetLife() < 0)
-						{
-							delete m_Obj[i];
-							m_Obj[i] = NULL;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void CSceneMgr::Character_render()
-{
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
-	{
-		if (m_Obj[i] != NULL)
-		{
-			m_Renderer->DrawSolidRect(m_Obj[i]->GetXpos(), m_Obj[i]->GetYpos(), 0, m_Obj[i]->GetSize()
-				, m_Obj[i]->GetcolorR(), m_Obj[i]->GetcolorG(), m_Obj[i]->GetcolorB(), 1);
-		}
-	}
-}
-
-void CSceneMgr::Building_render()
-{
-	if (m_Building != NULL)
-	{
-		GLint m_texCharacter = m_Renderer->CreatePngTexture("../Resource/pika.png");
-		/*m_Renderer->DrawSolidRect(m_Building->GetXpos(), m_Building->GetYpos(), 0, m_Building->GetSize()
-			, m_Building->GetcolorR(), m_Building->GetcolorG(), m_Building->GetcolorB(), 1);*/
-		m_Renderer->DrawTexturedRect(m_Building->GetXpos(), m_Building->GetYpos(), 0, m_Building->GetSize()
-			, m_Building->GetcolorR(), m_Building->GetcolorG(), m_Building->GetcolorB(), 1, m_texCharacter);
-	}
-}
-
-void CSceneMgr::Bullet_render()
-{
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
-	{
-		if (m_Bullet[i] != NULL)
-		{
-			m_Renderer->DrawSolidRect(m_Bullet[i]->GetXpos(), m_Bullet[i]->GetYpos(), 0, m_Bullet[i]->GetSize()
-				, m_Bullet[i]->GetcolorR(), m_Bullet[i]->GetcolorG(), m_Bullet[i]->GetcolorB(), 1);
-		}
-	}
-}
-
-void CSceneMgr::Arrow_render()
-{
-	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
-	{
-		if (m_Obj[i] != NULL)
-		{
-			for (int j = 0; j < MAX_ARROW_COUNT; ++j)
-			{
-				if (m_Arrow[i][j] != NULL)
-				{
-					m_Renderer->DrawSolidRect(m_Arrow[i][j]->GetXpos(), m_Arrow[i][j]->GetYpos(), 0, m_Arrow[i][j]->GetSize()
-						, m_Arrow[i][j]->GetcolorR(), m_Arrow[i][j]->GetcolorG(), m_Arrow[i][j]->GetcolorB(), 1);
-				}
-				
-			}
-		}
-	}
-}

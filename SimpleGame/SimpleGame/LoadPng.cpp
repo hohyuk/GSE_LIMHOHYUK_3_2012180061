@@ -1459,11 +1459,11 @@ static void updateHashChain(Hash* hash, size_t wpos, unsigned hashval, unsigned 
 {
 	hash->val[wpos] = (int)hashval;
 	if (hash->head[hashval] != -1) hash->chain[wpos] = hash->head[hashval];
-	hash->head[hashval] = wpos;
+	hash->head[hashval] = (int)wpos;
 
 	hash->zeros[wpos] = numzeros;
 	if (hash->headz[numzeros] != -1) hash->chainz[wpos] = hash->headz[numzeros];
-	hash->headz[numzeros] = wpos;
+	hash->headz[numzeros] = (int)wpos;
 }
 
 /*
@@ -5406,7 +5406,7 @@ static unsigned filter(unsigned char* out, const unsigned char* in, unsigned w, 
 		{
 			for (type = 0; type != 5; ++type)
 			{
-				unsigned testsize = linebytes;
+				unsigned testsize = (unsigned int)linebytes;
 				/*if(testsize > 8) testsize /= 8;*/ /*it already works good enough by testing a part of the row*/
 
 				filterScanline(attempt[type], &in[y * linebytes], prevline, linebytes, bytewidth, type);

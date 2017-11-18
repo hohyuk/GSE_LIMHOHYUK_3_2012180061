@@ -10,28 +10,28 @@ but WITHOUT ANY WARRANTY.
 
 #include "stdafx.h"
 //#include <iostream>
-#include "SceneMgr.h"
-
-
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
+#include "SceneMgr.h"
 
+CSceneMgr* g_SceneMgr = NULL;
 
-DWORD prevTime = timeGetTime();
-
-CSceneMgr *g_SceneMgr = NULL;
-
+// 타임값을 구한다.
+DWORD g_prevTime = 0;
+float g_coolTime = COOLTIME;
 void RenderScene(void)
 {
-	DWORD curTime = timeGetTime();
-	DWORD elapsedTime = curTime - prevTime;		// 경과시간 = 현재시간 - 과거시간.
-	prevTime = curTime;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
+	DWORD curTime = timeGetTime();
+	DWORD elapsedTime = curTime - g_prevTime;	// 경과시간 = 현재시간 - 과거시간.
+	g_prevTime = curTime;
+	g_coolTime += elapsedTime / 1000.f;		// 마우스 버튼 쿨타임
 	g_SceneMgr->Update(float(elapsedTime));
 	g_SceneMgr->Render();
+
 	glutSwapBuffers();
 }
 
@@ -42,12 +42,17 @@ void Idle(void)
 
 void MouseInput(int button, int state, int x, int y)
 {
+	float resetX = float(x - Width / 2);
+	float resetY = float(-(y - Height / 2));
 	bool Lbutton = button == GLUT_LEFT_BUTTON && state == GLUT_DOWN;
-
-	// 마우스 클릭 오브젝트 생성.
-	if (Lbutton)
-		g_SceneMgr->CreateObj(x, y);
-
+	bool LCoolTime = g_coolTime > COOLTIME;
+	bool South_IN = resetY < 0 && Lbutton && LCoolTime;		// 0 작아야하고 7초이상 왼쪽버튼 눌렸으면 TRUE. 
+	
+	if (South_IN)
+	{
+		g_SceneMgr->AddActorObject(resetX, resetY, OBJECT_PLAYER, OBJECT_CHARACTER);
+		g_coolTime = 0.f;
+	}
 	RenderScene();
 }
 
@@ -63,7 +68,6 @@ void SpecialKeyInput(int key, int x, int y)
 
 int main(int argc, char **argv)
 {
-	srand((unsigned)time(NULL));
 	// Initialize GL things
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -81,7 +85,7 @@ int main(int argc, char **argv)
 		std::cout << "GLEW 3.0 not supported\n ";
 	}
 
-	// SceneMgr 객체 생성
+	// Initialize SceneMgr
 	g_SceneMgr = new CSceneMgr();
 
 	glutDisplayFunc(RenderScene);
@@ -90,13 +94,14 @@ int main(int argc, char **argv)
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 
+	g_prevTime = timeGetTime();		// Loop를 돌기전 마지막 타임을 저장.
 
 	glutMainLoop();
 
 	// 객체 삭제
 	g_SceneMgr->Release();
 	delete g_SceneMgr;
-
-	return 0;
+	g_SceneMgr = NULL;
+    return 0;
 }
 

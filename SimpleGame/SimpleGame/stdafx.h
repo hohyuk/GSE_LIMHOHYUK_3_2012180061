@@ -8,5 +8,6 @@
 #include <tchar.h>
 #include <time.h>
 
-#include "refer.h"
+#include "Refer.h"
+
 using namespace std;
