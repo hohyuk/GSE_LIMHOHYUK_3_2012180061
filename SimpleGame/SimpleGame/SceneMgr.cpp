@@ -279,4 +279,3 @@ void CSceneMgr::CreateCharacter(float elapsedTime)
 		m_characterTime = 0.f;
 	}
 }
-
