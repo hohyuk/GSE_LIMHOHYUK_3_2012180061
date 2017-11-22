@@ -98,22 +98,22 @@ void CObj::moveObjs()
 {
 	if (xPos > Width / 2)
 	{
-		areaOut();
+		//areaOut();
 		speedX = -speedX;
 	}
 	if (xPos < -Width / 2)
 	{
-		areaOut();
+		//areaOut();
 		speedX = -speedX;
 	}
 	if (yPos > Height / 2)
 	{
-		areaOut();
+		//areaOut();
 		speedY = -speedY;
 	}
 	if (yPos < -Height / 2)
 	{
-		areaOut();
+		//areaOut();
 		speedY = -speedY;
 	}
 	// ElapsedTime / 1000.f -> 0.01sec
