@@ -79,36 +79,23 @@ void CSceneMgr::Render()
 		if (m_Objs[i] != NULL)
 		{
 			// Gauge
-			if (m_Objs[i]->GetType() == OBJECT_BUILDING || m_Objs[i]->GetType() == OBJECT_CHARACTER)
-			{
-				if (m_Objs[i]->GetTeam() == OBJECT_PLAYER)
-					GaugeRander(m_Objs[i], 0, 0, 1, 1);
-				else if(m_Objs[i]->GetTeam() == OBJECT_ENEMY)
-					GaugeRander(m_Objs[i], 1, 0, 0, 1);
-			}
-				
-			// Building Obj
-			if (m_Objs[i]->GetType() == OBJECT_BUILDING)
-			{
-				GLint m_texCharacter;
+			bool isTexture = m_Objs[i]->GetType() == OBJECT_BUILDING || m_Objs[i]->GetType() == OBJECT_CHARACTER;
 
+			if (isTexture)
+			{
 				if (m_Objs[i]->GetTeam() == OBJECT_PLAYER)
-					m_texCharacter = m_Renderer->CreatePngTexture("../Resource/building1.png");
+				{
+					TextureRender(m_Objs[i], OBJECT_CHARACTER, "../Resource/player01.png");
+					TextureRender(m_Objs[i], OBJECT_BUILDING, "../Resource/building1.png");
+					GaugeRender(m_Objs[i], 0, 0, 1, 1);
+				}	
 				else if (m_Objs[i]->GetTeam() == OBJECT_ENEMY)
-					m_texCharacter = m_Renderer->CreatePngTexture("../Resource/building2.png");
-
-				m_Renderer->DrawTexturedRect(
-					m_Objs[i]->GetXpos(),
-					m_Objs[i]->GetYpos(),
-					0,
-					m_Objs[i]->GetSize(),
-					m_Objs[i]->GetcolorR(),
-					m_Objs[i]->GetcolorG(),
-					m_Objs[i]->GetcolorB(),
-					m_Objs[i]->GetcolorA(),
-					m_texCharacter,
-					m_Objs[i]->GetRank()
-				);
+				{
+					TextureRender(m_Objs[i], OBJECT_CHARACTER, "../Resource/enemy01.png");
+					TextureRender(m_Objs[i], OBJECT_BUILDING, "../Resource/building2.png");
+					GaugeRender(m_Objs[i], 1, 0, 0, 1);
+				}
+					
 			}
 			else
 			{
@@ -121,9 +108,10 @@ void CSceneMgr::Render()
 					m_Objs[i]->GetcolorG(),
 					m_Objs[i]->GetcolorB(),
 					m_Objs[i]->GetcolorA(),
-					m_Objs[i]->GetRank()
+					m_Objs[i]->GetLevel()
 				);
 			}
+			
 		}
 	}
 }
@@ -203,7 +191,6 @@ bool CSceneMgr::ObjTypeCompare(CObj* & Obj_1, CObj* & Obj_2)
 	ObjTypeCollision(Obj_1, Obj_2);
 	ObjTypeCollision(Obj_2, Obj_1);
 
-	
 	return true;
 }
 
@@ -255,7 +242,6 @@ void CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
 		Obj_1->SetDamage(Obj_2->GetLife());
 		Obj_2->SetLife(0);
 	}
-
 }
 
 void CSceneMgr::CreateBullet(CObj *& Obj)
@@ -294,16 +280,38 @@ void CSceneMgr::CreateCharacter(float elapsedTime)
 	}
 }
 
-void CSceneMgr::GaugeRander(CObj*& Obj, float r, float g, float b, float a)
+void CSceneMgr::TextureRender(CObj*& Obj, OBJTYPE type, char* filepath)
+{
+	GLint m_texCharacter;
+	if (Obj->GetType() == type)
+	{
+		m_texCharacter = m_Renderer->CreatePngTexture(filepath);
+
+		m_Renderer->DrawTexturedRect(
+			Obj->GetXpos(),
+			Obj->GetYpos(),
+			0,
+			Obj->GetSize(),
+			Obj->GetcolorR(),
+			Obj->GetcolorG(),
+			Obj->GetcolorB(),
+			Obj->GetcolorA(),
+			m_texCharacter,
+			Obj->GetLevel()
+		);
+	}
+}
+
+void CSceneMgr::GaugeRender(CObj*& Obj, float r, float g, float b, float a)
 {
 	m_Renderer->DrawSolidRectGauge(
 		Obj->GetXpos(),
-		Obj->GetYpos() + (Obj->GetSize() / 2.f + 3.f),
+		Obj->GetYpos() + (Obj->GetSize() / 2.f + 10.f),
 		0,
 		Obj->GetSize(),
-		10,
+		5,
 		r, g, b, a,
 		Obj->GetGauge(),
-		Obj->GetRank()
+		Obj->GetLevel()
 	);
 }

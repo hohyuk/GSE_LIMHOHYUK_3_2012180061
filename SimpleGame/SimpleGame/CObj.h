@@ -20,7 +20,7 @@ public:
 	OBJTYPE GetType() { return m_type; }
 	void SetColor(float r, float g, float b, float a) { colR = r, colG = g, colB = b, colA = a; }
 	void SetLife(float life) { m_life = life; }
-	void SetDamage(float damage) { m_life -= damage; }
+	void SetDamage(float damage) { m_life -= damage; m_gauge = m_life / m_FullLife; }
 	// 타임
 	float GetBulletTime() { return m_bulletTime; }
 	void ReSetBulletTime() { m_bulletTime = 0.f; }
@@ -28,7 +28,7 @@ public:
 	void ReSetArrowTime() { m_arrowTime = 0.f; }
 
 	// 우선순위 렌더링
-	float GetRank() { return m_rank; }
+	float GetLevel() { return m_level; }
 
 	// 게이지 
 	float GetGauge() { return m_gauge; }
@@ -41,11 +41,12 @@ private:
 	float xPos, yPos, m_size;
 	float colR, colG, colB, colA;
 	float speedX, speedY;
+	float m_FullLife;
 	float m_life;
 	float m_lifeTime;
 	OBJTYPE m_team;
 	OBJTYPE m_type;
-	float m_rank;
+	float m_level;
 	float m_gauge;
 	float m_bulletTime;
 	float m_arrowTime;
