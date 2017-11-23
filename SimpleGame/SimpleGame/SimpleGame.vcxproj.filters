@@ -30,9 +30,6 @@
     <ClInclude Include="LoadPng.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Refer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -40,6 +37,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="SceneMgr.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,13 +53,13 @@
     <ClCompile Include="LoadPng.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="CObj.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="SceneMgr.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -68,6 +68,12 @@
       <Filter>소스 파일\Shaders</Filter>
     </None>
     <None Include="Shaders\SolidRect.vs">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\SolidRectGauge.fs">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\SolidRectGauge.vs">
       <Filter>소스 파일\Shaders</Filter>
     </None>
     <None Include="Shaders\SolidRectWithTexture.fs">
@@ -80,6 +86,12 @@
       <Filter>소스 파일\Shaders</Filter>
     </None>
     <None Include="Shaders\SolidRectWithTextureSeq.vs">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\SolidRectXY.fs">
+      <Filter>소스 파일\Shaders</Filter>
+    </None>
+    <None Include="Shaders\SolidRectXY.vs">
       <Filter>소스 파일\Shaders</Filter>
     </None>
   </ItemGroup>

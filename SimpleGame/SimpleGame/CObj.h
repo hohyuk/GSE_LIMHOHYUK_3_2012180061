@@ -27,6 +27,12 @@ public:
 	float GetArrowTime() { return m_arrowTime; }
 	void ReSetArrowTime() { m_arrowTime = 0.f; }
 
+	// 우선순위 렌더링
+	float GetRank() { return m_rank; }
+
+	// 게이지 
+	float GetGauge() { return m_gauge; }
+
 	void Update(float elapsedTime);
 private:
 	void moveObjs();
@@ -39,7 +45,8 @@ private:
 	float m_lifeTime;
 	OBJTYPE m_team;
 	OBJTYPE m_type;
-	
+	float m_rank;
+	float m_gauge;
 	float m_bulletTime;
 	float m_arrowTime;
 	float ElapsedTimeSecond;

@@ -78,16 +78,15 @@ void CSceneMgr::Render()
 	{
 		if (m_Objs[i] != NULL)
 		{
-			m_Renderer->DrawSolidRect(
-				m_Objs[i]->GetXpos(),
-				m_Objs[i]->GetYpos(),
-				0,
-				m_Objs[i]->GetSize(),
-				m_Objs[i]->GetcolorR(),
-				m_Objs[i]->GetcolorG(),
-				m_Objs[i]->GetcolorB(),
-				m_Objs[i]->GetcolorA()
-			);
+			// Gauge
+			if (m_Objs[i]->GetType() == OBJECT_BUILDING || m_Objs[i]->GetType() == OBJECT_CHARACTER)
+			{
+				if (m_Objs[i]->GetTeam() == OBJECT_PLAYER)
+					GaugeRander(m_Objs[i], 0, 0, 1, 1);
+				else if(m_Objs[i]->GetTeam() == OBJECT_ENEMY)
+					GaugeRander(m_Objs[i], 1, 0, 0, 1);
+			}
+				
 			// Building Obj
 			if (m_Objs[i]->GetType() == OBJECT_BUILDING)
 			{
@@ -107,7 +106,23 @@ void CSceneMgr::Render()
 					m_Objs[i]->GetcolorG(),
 					m_Objs[i]->GetcolorB(),
 					m_Objs[i]->GetcolorA(),
-					m_texCharacter);
+					m_texCharacter,
+					m_Objs[i]->GetRank()
+				);
+			}
+			else
+			{
+				m_Renderer->DrawSolidRect(
+					m_Objs[i]->GetXpos(),
+					m_Objs[i]->GetYpos(),
+					0,
+					m_Objs[i]->GetSize(),
+					m_Objs[i]->GetcolorR(),
+					m_Objs[i]->GetcolorG(),
+					m_Objs[i]->GetcolorB(),
+					m_Objs[i]->GetcolorA(),
+					m_Objs[i]->GetRank()
+				);
 			}
 		}
 	}
@@ -189,7 +204,6 @@ bool CSceneMgr::ObjTypeCompare(CObj* & Obj_1, CObj* & Obj_2)
 	ObjTypeCollision(Obj_2, Obj_1);
 
 	
-
 	return true;
 }
 
@@ -247,7 +261,7 @@ void CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
 void CSceneMgr::CreateBullet(CObj *& Obj)
 {
 	bool isType = Obj->GetType() == OBJECT_BUILDING;
-	bool isTime = Obj->GetBulletTime() > 10.f;		// 10초당 1발씩.
+	bool isTime = Obj->GetBulletTime() > 2.f;		// 2초당 1발씩.
 	if (isType && isTime)
 	{
 		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_BULLET);
@@ -258,7 +272,7 @@ void CSceneMgr::CreateBullet(CObj *& Obj)
 void CSceneMgr::CreateArrow(CObj *& Obj)
 {
 	bool isType = Obj->GetType() == OBJECT_CHARACTER;
-	bool isTime = Obj->GetArrowTime() > 3.f;		// 10초당 1발씩.
+	bool isTime = Obj->GetArrowTime() > 1.f;		// 1초당 1발씩.
 	if (isType && isTime)
 	{
 		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_ARROW);
@@ -269,7 +283,7 @@ void CSceneMgr::CreateArrow(CObj *& Obj)
 void CSceneMgr::CreateCharacter(float elapsedTime)
 {
 	m_characterTime += elapsedTime / 1000.f;
-	bool isTime = m_characterTime > 5.f;	// 5초당 1발씩.
+	bool isTime = m_characterTime > 2.f;	// 2초당 1발씩.
 
 	if (isTime)
 	{
@@ -278,4 +292,18 @@ void CSceneMgr::CreateCharacter(float elapsedTime)
 		AddActorObject(x, y, OBJECT_ENEMY, OBJECT_CHARACTER);
 		m_characterTime = 0.f;
 	}
+}
+
+void CSceneMgr::GaugeRander(CObj*& Obj, float r, float g, float b, float a)
+{
+	m_Renderer->DrawSolidRectGauge(
+		Obj->GetXpos(),
+		Obj->GetYpos() + (Obj->GetSize() / 2.f + 3.f),
+		0,
+		Obj->GetSize(),
+		10,
+		r, g, b, a,
+		Obj->GetGauge(),
+		Obj->GetRank()
+	);
 }

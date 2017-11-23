@@ -22,6 +22,8 @@ private:
 	void CreateBullet(CObj*& Obj);
 	void CreateArrow(CObj*& Obj);
 	void CreateCharacter(float elapsedTime);
+
+	void GaugeRander(CObj*& Obj, float r, float g, float b, float a);
 private:
 	Renderer* m_Renderer;
 	CObj* m_Objs[MAX_OBJ_COUNT];

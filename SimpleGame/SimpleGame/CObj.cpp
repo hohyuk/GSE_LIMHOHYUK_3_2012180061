@@ -20,16 +20,21 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 		{
 		case OBJECT_CHARACTER:
 			colR = colG = 0.f; colB = colA = 1.f;
-			m_size = 10.f;
-			m_life = 10;
+			m_size = 30.f;
+			m_life = 100;
 			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 300.f * (((float)rand() / (float)RAND_MAX));
+			m_rank = OBJRANK_CHARACTER;
+			m_gauge = 1.f;
 			break;
 		case OBJECT_BUILDING:
+			colR = colG = colB = colA = 1.f;
 			m_size = 100.f;
 			m_life = 500;
 			speedX = 0.f;
 			speedY = 0.f;
+			m_rank = OBJRANK_BUILDING;
+			m_gauge = 1.f;
 			break;
 		case OBJECT_BULLET:
 			colR = colG = 0.f; colB = colA = 1.f;
@@ -37,6 +42,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_life = 20;
 			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 600.f;
+			m_rank = OBJRANK_BULLET;
 			break;
 		case OBJECT_ARROW:
 			colR = colG = colA = 1.f; colB = 0.f;
@@ -44,6 +50,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_life = 10;
 			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 600.f * (float(rand() % 2) - 0.5f);
+			m_rank = OBJRANK_ARROW;
 			break;
 		}
 	}
@@ -53,16 +60,21 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 		{
 		case OBJECT_CHARACTER: 
 			colR = colA = 1.f; colG = colB = 0.f;
-			m_size = 10.f;
-			m_life = 10;
+			m_size = 30.f;
+			m_life = 100;
 			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			m_rank = OBJRANK_CHARACTER;
+			m_gauge = 1.f;
 			break;
 		case OBJECT_BUILDING:
+			colR = colG = colB = colA = 1.f;
 			m_size = 100.f;
 			m_life = 500;
 			speedX = 0.f;
 			speedY = 0.f;
+			m_rank = OBJRANK_BUILDING;
+			m_gauge = 1.f;
 			break;
 		case OBJECT_BULLET:
 			colR = colA = 1.f; colG = colB = 0.f;
@@ -70,6 +82,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_life = 20;
 			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = -600.f; 
+			m_rank = OBJRANK_BULLET;
 			break;
 		case OBJECT_ARROW:
 			colR = 0.5f, colG = 0.2f, colB = 0.7f, colA = 1.f;
@@ -77,6 +90,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_life = 10;
 			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 600.f * (float(rand() % 2) - 0.5f); 
+			m_rank = OBJRANK_ARROW;
 			break;
 		}
 	}
@@ -98,22 +112,22 @@ void CObj::moveObjs()
 {
 	if (xPos > Width / 2)
 	{
-		//areaOut();
+		areaOut();
 		speedX = -speedX;
 	}
 	if (xPos < -Width / 2)
 	{
-		//areaOut();
+		areaOut();
 		speedX = -speedX;
 	}
 	if (yPos > Height / 2)
 	{
-		//areaOut();
+		areaOut();
 		speedY = -speedY;
 	}
 	if (yPos < -Height / 2)
 	{
-		//areaOut();
+		areaOut();
 		speedY = -speedY;
 	}
 	// ElapsedTime / 1000.f -> 0.01sec
