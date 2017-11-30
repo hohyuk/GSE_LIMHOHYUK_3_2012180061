@@ -19,7 +19,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 		switch (type)
 		{
 		case OBJECT_CHARACTER:
-			colR = colG = colB = colA = 1.f;
+			//colR = colG = colB = colA = 1.f;
 			m_size = 30.f;
 			m_FullLife = m_life = 100;
 			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
@@ -29,7 +29,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_anim = 0.f;
 			break;
 		case OBJECT_BUILDING:
-			colR = colG = colB = colA = 1.f;
+			//colR = colG = colB = colA = 1.f;
 			m_size = 100.f;
 			m_FullLife = m_life = 500;
 			speedX = 0.f;
@@ -39,9 +39,9 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			break;
 		case OBJECT_BULLET:
 			colR = colG = 0.f; colB = colA = 1.f;
-			m_size = 4.f;
+			m_size = 10.f;
 			m_life = 15;
-			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 300.f;
 			m_level = OBJLEVEL_BULLET;
 			break;
@@ -60,16 +60,17 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 		switch (type)
 		{
 		case OBJECT_CHARACTER: 
-			colR = colG = colB = colA = 1.f;
+			//colR = colG = colB = colA = 1.f;
 			m_size = 30.f;
 			m_FullLife = m_life = 100;
 			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			m_level = OBJLEVEL_CHARACTER;
 			m_gauge = 1.f;
+			m_anim = 0.f;
 			break;
 		case OBJECT_BUILDING:
-			colR = colG = colB = colA = 1.f;
+			//colR = colG = colB = colA = 1.f;
 			m_size = 100.f;
 			m_FullLife = m_life = 500;
 			speedX = 0.f;
@@ -79,10 +80,10 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			break;
 		case OBJECT_BULLET:
 			colR = colA = 1.f; colG = colB = 0.f;
-			m_size = 4.f;
+			m_size = 10.f;
 			m_life = 15;
-			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			speedY = -600.f; 
+			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			speedY = -300.f; 
 			m_level = OBJLEVEL_BULLET;
 			break;
 		case OBJECT_ARROW:
@@ -108,7 +109,7 @@ void CObj::Update(float elapsedTime)
 	m_arrowTime += ElapsedTimeSecond;
 
 	// anim
-	m_anim += (m_anim + 1) % 6;
+	m_anim += (m_anim + 1) % 5;
 	moveObjs();
 }
 
