@@ -32,7 +32,8 @@ public:
 
 	// 게이지 
 	float GetGauge() { return m_gauge; }
-
+	// 애니메이션
+	int GetAnim() { return m_anim; }
 	void Update(float elapsedTime);
 private:
 	void moveObjs();
@@ -51,5 +52,6 @@ private:
 	float m_bulletTime;
 	float m_arrowTime;
 	float ElapsedTimeSecond;
+	int m_anim;
 };
 

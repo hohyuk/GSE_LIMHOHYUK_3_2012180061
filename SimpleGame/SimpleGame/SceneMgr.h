@@ -24,9 +24,12 @@ private:
 	void CreateCharacter(float elapsedTime);
 
 	void TextureRender(CObj*& Obj, OBJTYPE type, char* filepath);
+	void AnimationRender(CObj*& Obj, OBJTYPE type, char* filepath);
+	void ParticleRender(CObj*& Obj,float yDir, char* filepath);
 	void GaugeRender(CObj*& Obj, float r, float g, float b, float a);
 private:
 	Renderer* m_Renderer;
 	CObj* m_Objs[MAX_OBJ_COUNT];
 	GLfloat m_characterTime;
+	GLfloat m_particleTime;
 };

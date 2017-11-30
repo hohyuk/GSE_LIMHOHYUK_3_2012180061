@@ -50,6 +50,7 @@ bool CSceneMgr::AddActorObject(float x, float y, OBJTYPE team, OBJTYPE type)
 
 void CSceneMgr::Update(float elapsedTime)
 {
+	m_particleTime += elapsedTime / 1000.f;
 	CreateCharacter(elapsedTime);
 	CollisionCompare();
 	for (int i = 0; i < MAX_OBJ_COUNT; i++)
@@ -74,27 +75,53 @@ void CSceneMgr::Update(float elapsedTime)
 
 void CSceneMgr::Render()
 {
+	// ¹è°æ
+	GLint m_texCharacter;
+	
+	m_texCharacter = m_Renderer->CreatePngTexture("../Resource/background.png");
+	m_Renderer->DrawTexturedRect(
+		0,
+		0,
+		0,
+		800,
+		1,
+		1,
+		1,
+		1,
+		m_texCharacter,
+		0.5
+	);
 	for (int i = 0; i < MAX_OBJ_COUNT; i++)
 	{
 		if (m_Objs[i] != NULL)
 		{
 			// Gauge
-			bool isTexture = m_Objs[i]->GetType() == OBJECT_BUILDING || m_Objs[i]->GetType() == OBJECT_CHARACTER;
+			bool isTexture = m_Objs[i]->GetType() == OBJECT_BUILDING || m_Objs[i]->GetType() == OBJECT_CHARACTER || m_Objs[i]->GetType() == OBJECT_BULLET;
 
 			if (isTexture)
 			{
 				if (m_Objs[i]->GetTeam() == OBJECT_PLAYER)
 				{
-					TextureRender(m_Objs[i], OBJECT_CHARACTER, "../Resource/player01.png");
-					TextureRender(m_Objs[i], OBJECT_BUILDING, "../Resource/building1.png");
+					if (m_Objs[i]->GetType() == OBJECT_CHARACTER)
+						AnimationRender(m_Objs[i], OBJECT_CHARACTER, "../Resource/player01.png");
+					else if (m_Objs[i]->GetType() == OBJECT_BUILDING)
+						TextureRender(m_Objs[i], OBJECT_BUILDING, "../Resource/building1.png");
+					else if (m_Objs[i]->GetType() == OBJECT_BULLET)
+						ParticleRender(m_Objs[i], -1, "../Resource/particle01.png");
 					GaugeRender(m_Objs[i], 0, 0, 1, 1);
+					
 				}	
 				else if (m_Objs[i]->GetTeam() == OBJECT_ENEMY)
 				{
 					TextureRender(m_Objs[i], OBJECT_CHARACTER, "../Resource/enemy01.png");
 					TextureRender(m_Objs[i], OBJECT_BUILDING, "../Resource/building2.png");
+					if (m_Objs[i]->GetType() == OBJECT_BULLET)
+					{
+						ParticleRender(m_Objs[i], 1, "../Resource/particle02.png");
+					}
 					GaugeRender(m_Objs[i], 1, 0, 0, 1);
 				}
+				
 					
 			}
 			else
@@ -283,6 +310,7 @@ void CSceneMgr::CreateCharacter(float elapsedTime)
 void CSceneMgr::TextureRender(CObj*& Obj, OBJTYPE type, char* filepath)
 {
 	GLint m_texCharacter;
+	
 	if (Obj->GetType() == type)
 	{
 		m_texCharacter = m_Renderer->CreatePngTexture(filepath);
@@ -300,6 +328,30 @@ void CSceneMgr::TextureRender(CObj*& Obj, OBJTYPE type, char* filepath)
 			Obj->GetLevel()
 		);
 	}
+}
+
+void CSceneMgr::AnimationRender(CObj *& Obj, OBJTYPE type, char * filepath)
+{
+	GLint m_texCharacter;
+
+	m_texCharacter = m_Renderer->CreatePngTexture(filepath);
+	m_Renderer->DrawTexturedRectSeq(Obj->GetXpos(), Obj->GetYpos(), 0, Obj->GetSize(), Obj->GetcolorR(),
+		Obj->GetcolorG(),
+		Obj->GetcolorB(),
+		Obj->GetcolorA(),
+		m_texCharacter,
+		Obj->GetAnim(), 0, 6, 1, Obj->GetLevel()
+	);
+
+}
+
+void CSceneMgr::ParticleRender(CObj *& Obj, float yDir, char * filepath)
+{
+	GLint m_texCharacter;
+
+	m_texCharacter = m_Renderer->CreatePngTexture(filepath);
+	m_Renderer->DrawParticle(Obj->GetXpos(), Obj->GetYpos(), 0
+		, 5, 1, 1, 1, 1, 0, yDir, m_texCharacter, m_particleTime);
 }
 
 void CSceneMgr::GaugeRender(CObj*& Obj, float r, float g, float b, float a)

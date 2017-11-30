@@ -26,6 +26,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			speedY = 300.f * (((float)rand() / (float)RAND_MAX));
 			m_level = OBJLEVEL_CHARACTER;
 			m_gauge = 1.f;
+			m_anim = 0.f;
 			break;
 		case OBJECT_BUILDING:
 			colR = colG = colB = colA = 1.f;
@@ -41,7 +42,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_size = 4.f;
 			m_life = 15;
 			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			speedY = 600.f;
+			speedY = 300.f;
 			m_level = OBJLEVEL_BULLET;
 			break;
 		case OBJECT_ARROW:
@@ -105,6 +106,9 @@ void CObj::Update(float elapsedTime)
 	ElapsedTimeSecond = elapsedTime / 1000.f;
 	m_bulletTime += ElapsedTimeSecond;
 	m_arrowTime += ElapsedTimeSecond;
+
+	// anim
+	m_anim += (m_anim + 1) % 6;
 	moveObjs();
 }
 
