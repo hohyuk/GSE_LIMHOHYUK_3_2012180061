@@ -16,6 +16,20 @@ CSceneMgr::~CSceneMgr()
 
 void CSceneMgr::Init()
 {
+	m_texture[TEX_BACKGROUND] = m_Renderer->CreatePngTexture("../Resource/background.png");
+	m_texture[TEX_BUILDING1] = m_Renderer->CreatePngTexture("../Resource/building1.png");
+	m_texture[TEX_BUILDING2] = m_Renderer->CreatePngTexture("../Resource/building2.png");
+	m_texture[TEX_CHARACTER1] = m_Renderer->CreatePngTexture("../Resource/player01.png");
+	m_texture[TEX_CHARACTER2] = m_Renderer->CreatePngTexture("../Resource/enemy01.png");
+	m_texture[TEX_BULLET1] = m_Renderer->CreatePngTexture("../Resource/particle01.png");
+	m_texture[TEX_BULLET2] = m_Renderer->CreatePngTexture("../Resource/particle02.png");
+
+	m_Sound = new Sound();
+
+	int soundBG = m_Sound->CreateSound("./Dependencies/SoundSamples/MF-W-90.XM");
+
+	m_Sound->PlaySound(soundBG, true, 0.2f);
+
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
 		m_Objs[i] = NULL;
@@ -29,10 +43,7 @@ void CSceneMgr::Init()
 	AddActorObject(0, 300, OBJECT_ENEMY, OBJECT_BUILDING);
 	AddActorObject(150, 300, OBJECT_ENEMY, OBJECT_BUILDING);
 
-	
 	m_PlayerCoolTime = 0.f;
-
-	
 }
 
 bool CSceneMgr::AddActorObject(float x, float y, OBJTYPE team, OBJTYPE type)
@@ -88,21 +99,21 @@ void CSceneMgr::Render()
 			if (m_Objs[i]->GetTeam() == OBJECT_PLAYER)
 			{
 				if (m_Objs[i]->GetType() == OBJECT_BUILDING)
-					TextureRender(m_Objs[i], "../Resource/building1.png");
+					TextureRender(m_Objs[i], TEX_BUILDING1);
 				if (m_Objs[i]->GetType() == OBJECT_CHARACTER)
-					AnimationRender(m_Objs[i], "../Resource/player01.png",3);
+					AnimationRender(m_Objs[i], TEX_CHARACTER1,3);
 				if (m_Objs[i]->GetType() == OBJECT_BULLET)
-					ParticleRender(m_Objs[i], -1, "../Resource/particle01.png");
+					ParticleRender(m_Objs[i], -1, TEX_BULLET1);
 				GaugeRender(m_Objs[i], 0, 0, 1, 1);
 			}
 			else if (m_Objs[i]->GetTeam() == OBJECT_ENEMY)
 			{
 				if (m_Objs[i]->GetType() == OBJECT_BUILDING)
-					TextureRender(m_Objs[i], "../Resource/building2.png");
+					TextureRender(m_Objs[i], TEX_BUILDING2);
 				if (m_Objs[i]->GetType() == OBJECT_CHARACTER)
-					AnimationRender(m_Objs[i], "../Resource/enemy01.png", 5);
+					AnimationRender(m_Objs[i], TEX_CHARACTER2, 5);
 				if (m_Objs[i]->GetType() == OBJECT_BULLET)
-					ParticleRender(m_Objs[i], 1, "../Resource/particle03.png");
+					ParticleRender(m_Objs[i], 1, TEX_BULLET2);
 				GaugeRender(m_Objs[i], 1, 0, 0, 1);
 			}
 			else
@@ -122,6 +133,7 @@ void CSceneMgr::Render()
 			
 		}
 	}
+	m_Renderer->DrawText(0,0, GLUT_BITMAP_9_BY_15, 1,0, 0, "ABCD");
 }
 
 void CSceneMgr::Release()
@@ -291,47 +303,33 @@ void CSceneMgr::CreateCharacter(float elapsedTime)
 
 void CSceneMgr::BackGroundRender()
 {
-	// ¹è°æ
-	GLint m_texCharacter;
-
-	m_texCharacter = m_Renderer->CreatePngTexture("../Resource/background.png");
-	m_Renderer->DrawTexturedRect(0, 0, 0, float(Height), 1, 1, 1, 1, m_texCharacter, OBJLEVEL_BACKGROUND);
+	m_Renderer->DrawTexturedRect(0, 0, 0, float(Height), 1, 1, 1, 1, m_texture[TEX_BACKGROUND], OBJLEVEL_BACKGROUND);
 }
 
-void CSceneMgr::TextureRender(CObj*& Obj, char* filepath)
+void CSceneMgr::TextureRender(CObj*& Obj, GLuint num)
 {
-	GLint m_texCharacter;
-	m_texCharacter = m_Renderer->CreatePngTexture(filepath);
-
 	m_Renderer->DrawTexturedRect(Obj->GetXpos(), Obj->GetYpos(), 0,
 		Obj->GetSize(),
 		1, 1, 1, 1,
-		m_texCharacter,
+		m_texture[num],
 		Obj->GetLevel()
 	);
-	
 }
 
-void CSceneMgr::AnimationRender(CObj *& Obj, char * filepath, int totalX)
+void CSceneMgr::AnimationRender(CObj *& Obj, GLuint num, int totalX)
 {
-	GLint m_texCharacter;
-	m_texCharacter = m_Renderer->CreatePngTexture(filepath);
-
 	m_Renderer->DrawTexturedRectSeq(Obj->GetXpos(), Obj->GetYpos(), 0,
 		Obj->GetSize(),
 		1, 1, 1, 1,
-		m_texCharacter,
+		m_texture[num],
 		Obj->GetAnim(), 0, totalX, 1, Obj->GetLevel()
 	);
 }
 
-void CSceneMgr::ParticleRender(CObj *& Obj, float yDir, char * filepath)
+void CSceneMgr::ParticleRender(CObj *& Obj, float yDir, GLuint num)
 {
-	GLint m_texCharacter;
-	m_texCharacter = m_Renderer->CreatePngTexture(filepath);
-
 	m_Renderer->DrawParticle(Obj->GetXpos(), Obj->GetYpos(), 0
-		, Obj->GetSize(), 1, 1, 1, 1, 0, yDir, m_texCharacter, m_particleTime);
+		, Obj->GetSize(), 1, 1, 1, 1, 0, yDir, m_texture[num], m_particleTime);
 }
 
 void CSceneMgr::GaugeRender(CObj*& Obj, float r, float g, float b, float a)
