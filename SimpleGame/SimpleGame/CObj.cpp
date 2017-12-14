@@ -39,7 +39,7 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			break;
 		case OBJECT_BULLET:
 			colR = colG = 0.f; colB = colA = 1.f;
-			m_size = 10.f;
+			m_size = 15.f;
 			m_life = 15;
 			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = 300.f;

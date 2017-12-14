@@ -22,7 +22,7 @@ void CSceneMgr::Init()
 	m_texture[TEX_CHARACTER1] = m_Renderer->CreatePngTexture("../Resource/player01.png");
 	m_texture[TEX_CHARACTER2] = m_Renderer->CreatePngTexture("../Resource/enemy01.png");
 	m_texture[TEX_BULLET1] = m_Renderer->CreatePngTexture("../Resource/particle01.png");
-	m_texture[TEX_BULLET2] = m_Renderer->CreatePngTexture("../Resource/particle02.png");
+	m_texture[TEX_BULLET2] = m_Renderer->CreatePngTexture("../Resource/particle03.png");
 
 	m_Sound = new Sound();
 
@@ -99,36 +99,61 @@ void CSceneMgr::Render()
 			if (m_Objs[i]->GetTeam() == OBJECT_PLAYER)
 			{
 				if (m_Objs[i]->GetType() == OBJECT_BUILDING)
+				{
 					TextureRender(m_Objs[i], TEX_BUILDING1);
+					GaugeRender(m_Objs[i], 1, 0, 0, 1);
+				}
+					
 				if (m_Objs[i]->GetType() == OBJECT_CHARACTER)
-					AnimationRender(m_Objs[i], TEX_CHARACTER1,3);
+				{
+					AnimationRender(m_Objs[i], TEX_CHARACTER1, 3);
+					GaugeRender(m_Objs[i], 1, 0, 0, 1);
+				}
+					
 				if (m_Objs[i]->GetType() == OBJECT_BULLET)
 					ParticleRender(m_Objs[i], -1, TEX_BULLET1);
+				else
+				{
+					m_Renderer->DrawSolidRect(
+						m_Objs[i]->GetXpos(),
+						m_Objs[i]->GetYpos(),
+						0,
+						m_Objs[i]->GetSize(),
+						m_Objs[i]->GetcolorR(),
+						m_Objs[i]->GetcolorG(),
+						m_Objs[i]->GetcolorB(),
+						m_Objs[i]->GetcolorA(),
+						m_Objs[i]->GetLevel());
+				}
 				GaugeRender(m_Objs[i], 0, 0, 1, 1);
 			}
 			else if (m_Objs[i]->GetTeam() == OBJECT_ENEMY)
 			{
 				if (m_Objs[i]->GetType() == OBJECT_BUILDING)
+				{
 					TextureRender(m_Objs[i], TEX_BUILDING2);
+					GaugeRender(m_Objs[i], 1, 0, 0, 1);
+				}
 				if (m_Objs[i]->GetType() == OBJECT_CHARACTER)
+				{
 					AnimationRender(m_Objs[i], TEX_CHARACTER2, 5);
+					GaugeRender(m_Objs[i], 1, 0, 0, 1);
+				}
 				if (m_Objs[i]->GetType() == OBJECT_BULLET)
 					ParticleRender(m_Objs[i], 1, TEX_BULLET2);
-				GaugeRender(m_Objs[i], 1, 0, 0, 1);
-			}
-			else
-			{
-				m_Renderer->DrawSolidRect(
-					m_Objs[i]->GetXpos(),
-					m_Objs[i]->GetYpos(),
-					0,
-					m_Objs[i]->GetSize(),
-					m_Objs[i]->GetcolorR(),
-					m_Objs[i]->GetcolorG(),
-					m_Objs[i]->GetcolorB(),
-					m_Objs[i]->GetcolorA(),
-					m_Objs[i]->GetLevel()
-				);
+				else
+					m_Renderer->DrawSolidRect(
+						m_Objs[i]->GetXpos(),
+						m_Objs[i]->GetYpos(),
+						0,
+						m_Objs[i]->GetSize(),
+						m_Objs[i]->GetcolorR(),
+						m_Objs[i]->GetcolorG(),
+						m_Objs[i]->GetcolorB(),
+						m_Objs[i]->GetcolorA(),
+						m_Objs[i]->GetLevel()
+					);
+				
 			}
 			
 		}
