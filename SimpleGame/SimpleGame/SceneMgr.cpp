@@ -26,7 +26,7 @@ void CSceneMgr::Init()
 
 	m_Sound = new Sound();
 
-	int soundBG = m_Sound->CreateSound("./Dependencies/SoundSamples/MF-W-90.XM");
+	int soundBG = m_Sound->CreateSound("../Sound/Stage1.mp3");
 
 	m_Sound->PlaySound(soundBG, true, 0.2f);
 
