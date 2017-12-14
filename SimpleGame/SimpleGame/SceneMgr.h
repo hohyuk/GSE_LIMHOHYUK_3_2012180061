@@ -35,7 +35,7 @@ private:
 	CObj* m_Objs[MAX_OBJ_COUNT];
 	GLfloat m_PlayerCoolTime;
 	GLfloat m_particleTime;
-	GLuint m_texture[7];
+	GLuint m_texture[8];
 
 	// Sound
 	Sound* m_Sound;

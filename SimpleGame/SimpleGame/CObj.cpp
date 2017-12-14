@@ -42,8 +42,15 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_size = 15.f;
 			m_life = 15;
 			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			if (speedX > 0)
+				m_paticleDirX = 1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			else
+				m_paticleDirX = -1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+
 			speedY = 300.f;
 			m_level = OBJLEVEL_BULLET;
+			m_paticleTime = 0.f;
+			m_paticleDir = -1.f;
 			break;
 		case OBJECT_ARROW:
 			colR = colG = colA = 1.f; colB = 0.f;
@@ -83,8 +90,14 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 			m_size = 10.f;
 			m_life = 15;
 			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			if (speedX > 0)
+				m_paticleDirX = -1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			else
+				m_paticleDirX = 1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			speedY = -300.f; 
 			m_level = OBJLEVEL_BULLET;
+			m_paticleTime = 0.f;
+			m_paticleDir = 1.f;
 			break;
 		case OBJECT_ARROW:
 			colR = 0.5f, colG = 0.2f, colB = 0.7f, colA = 1.f;
@@ -107,7 +120,8 @@ void CObj::Update(float elapsedTime)
 	ElapsedTimeSecond = elapsedTime / 1000.f;
 	m_bulletTime += ElapsedTimeSecond;
 	m_arrowTime += ElapsedTimeSecond;
-
+	m_paticleTime += ElapsedTimeSecond;
+	
 	// anim
 	m_anim += (m_anim + 1) % 5;
 	moveObjs();

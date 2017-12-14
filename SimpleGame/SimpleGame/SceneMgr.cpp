@@ -23,7 +23,7 @@ void CSceneMgr::Init()
 	m_texture[TEX_CHARACTER2] = m_Renderer->CreatePngTexture("../Resource/enemy01.png");
 	m_texture[TEX_BULLET1] = m_Renderer->CreatePngTexture("../Resource/particle01.png");
 	m_texture[TEX_BULLET2] = m_Renderer->CreatePngTexture("../Resource/particle03.png");
-
+	m_texture[7] = m_Renderer->CreatePngTexture("../Resource/particle04.png");
 	m_Sound = new Sound();
 
 	int soundBG = m_Sound->CreateSound("../Sound/Stage1.mp3");
@@ -91,7 +91,7 @@ void CSceneMgr::Update(float elapsedTime)
 void CSceneMgr::Render()
 {
 	BackGroundRender();
-
+	
 	for (int i = 0; i < MAX_OBJ_COUNT; i++)
 	{
 		if (m_Objs[i] != NULL)
@@ -159,6 +159,7 @@ void CSceneMgr::Render()
 		}
 	}
 	m_Renderer->DrawText(0,0, GLUT_BITMAP_9_BY_15, 1,0, 0, "ABCD");
+	m_Renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1f, -0.1f, m_texture[7], m_particleTime, 0.01f);
 }
 
 void CSceneMgr::Release()
@@ -354,7 +355,7 @@ void CSceneMgr::AnimationRender(CObj *& Obj, GLuint num, int totalX)
 void CSceneMgr::ParticleRender(CObj *& Obj, float yDir, GLuint num)
 {
 	m_Renderer->DrawParticle(Obj->GetXpos(), Obj->GetYpos(), 0
-		, Obj->GetSize(), 1, 1, 1, 1, 0, yDir, m_texture[num], m_particleTime);
+		, Obj->GetSize(), 1, 1, 1, 1, (Obj->GetPaticleDirX() * Obj->GetPaticleTime()), (Obj->GetPaticleDir() * Obj->GetPaticleTime()), m_texture[num], Obj->GetPaticleTime(),0.9f);
 }
 
 void CSceneMgr::GaugeRender(CObj*& Obj, float r, float g, float b, float a)

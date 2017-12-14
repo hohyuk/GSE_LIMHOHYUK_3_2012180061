@@ -35,6 +35,10 @@ public:
 	// 애니메이션
 	int GetAnim() { return m_anim; }
 	void Update(float elapsedTime);
+	// 파티클 타임
+	float GetPaticleTime() { return m_paticleTime; }
+	float GetPaticleDirX() { return m_paticleDirX; }
+	float GetPaticleDir() { return m_paticleDir; }
 private:
 	void moveObjs();
 	void areaOut();
@@ -53,5 +57,10 @@ private:
 	float m_arrowTime;
 	float ElapsedTimeSecond;
 	int m_anim;
+
+	// 파티클 타임
+	float m_paticleTime;
+	float m_paticleDir;
+	float m_paticleDirX;
 };
 
