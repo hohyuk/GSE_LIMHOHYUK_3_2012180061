@@ -4,6 +4,7 @@ int CSceneMgr::Win = 0;
 int CSceneMgr::Lose = 0;
 
 CSceneMgr::CSceneMgr()
+	:m_PlayerCoolTime(0), m_FlyCoolTime(0), m_BombCoolTime(0)
 {
 	m_Renderer = new Renderer(Width, Height);
 	Init();
@@ -18,11 +19,11 @@ void CSceneMgr::Init()
 {
 	TextureInit();
 
-	/*m_Sound = new Sound();
+	m_Sound = new Sound();
 
 	int soundBG = m_Sound->CreateSound("../Sound/Stage1.mp3");
 
-	m_Sound->PlaySound(soundBG, true, 0.2f);*/
+	m_Sound->PlaySound(soundBG, true, 0.2f);
 
 	for (int i = 0; i < MAX_OBJ_COUNT; ++i)
 	{
@@ -37,7 +38,6 @@ void CSceneMgr::Init()
 	AddActorObject(0, 300, TEAM_YOUR, OBJECT_KING);
 	AddActorObject(250, 280, TEAM_YOUR, OBJECT_BUILDING);
 
-	m_PlayerCoolTime = 0.f;
 }
 
 bool CSceneMgr::AddActorObject(float x, float y, TEAM team, OBJTYPE type)
@@ -58,7 +58,9 @@ bool CSceneMgr::AddActorObject(float x, float y, TEAM team, OBJTYPE type)
 void CSceneMgr::Update(float elapsedTime)
 {
 	m_particleTime += elapsedTime / 1000.f;
-	CreateCharacter(elapsedTime);
+	CreateGroundUnit(elapsedTime);
+	CreateFlyUnit(elapsedTime);
+	CreateBombUnit(elapsedTime);
 	CollisionCompare();
 	for (int i = 0; i < MAX_OBJ_COUNT; i++)
 	{
@@ -70,6 +72,8 @@ void CSceneMgr::Update(float elapsedTime)
 
 				CreateBullet(m_Objs[i]);
 				CreateArrow(m_Objs[i]);
+				CreateFlyArrow(m_Objs[i]);
+				
 			}
 			else
 			{
@@ -123,6 +127,28 @@ void CSceneMgr::Render()
 					AnimationRender(m_Objs[i], TEX_GROUNDUNIT2, 5);
 				}
 			}
+			else if (m_Objs[i]->GetType() == OBJECT_FLYUNIT)
+			{
+				if (m_Objs[i]->GetTeam() == TEAM_MY)
+				{
+					TextureRender(m_Objs[i], TEX_FLYUNIT1);
+				}
+				else if (m_Objs[i]->GetTeam() == TEAM_YOUR)
+				{
+					TextureRender(m_Objs[i], TEX_FLYUNIT2);
+				}
+			}
+			else if (m_Objs[i]->GetType() == OBJECT_BOMBUNIT)
+			{
+				if (m_Objs[i]->GetTeam() == TEAM_MY)
+				{
+					TextureRender(m_Objs[i], TEX_BOMBUNIT1);
+				}
+				else if (m_Objs[i]->GetTeam() == TEAM_YOUR)
+				{
+					TextureRender(m_Objs[i], TEX_BOMBUNIT2);
+				}
+			}
 			else if (m_Objs[i]->GetType() == OBJECT_BULLET)
 			{
 				if (m_Objs[i]->GetTeam() == TEAM_MY)
@@ -147,8 +173,10 @@ void CSceneMgr::Render()
 			}
 		}
 	}
-	m_Renderer->DrawText(0,0, GLUT_BITMAP_9_BY_15, 1,0, 0, "ABCD");
-	m_Renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1f, -0.1f, m_texture[7], m_particleTime, 0.01f);
+	
+	m_Renderer->DrawText(-400, 350, GLUT_BITMAP_TIMES_ROMAN_24, 1, 0, 0, "2012180061");
+
+	m_Renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1f, -0.1f, m_texture[TEX_WEATHER], m_particleTime, 0.01f);
 }
 
 void CSceneMgr::Release()
@@ -167,14 +195,23 @@ void CSceneMgr::TextureInit()
 	m_texture[TEX_KING1] = m_Renderer->CreatePngTexture("../Resource/king1.png");
 	m_texture[TEX_BUILDING1] = m_Renderer->CreatePngTexture("../Resource/building1.png");
 	m_texture[TEX_GROUNDUNIT1] = m_Renderer->CreatePngTexture("../Resource/player01.png");
-	m_texture[TEX_BULLET1] = m_Renderer->CreatePngTexture("../Resource/particle04.png");
+	m_texture[TEX_FLYUNIT1] = m_Renderer->CreatePngTexture("../Resource/fly01.png");
+	m_texture[TEX_BULLET1] = m_Renderer->CreatePngTexture("../Resource/particle05.png");
+	m_texture[TEX_FLYARROW1] = m_Renderer->CreatePngTexture("../Resource/particle05.png");
+	m_texture[TEX_BOMBUNIT1] = m_Renderer->CreatePngTexture("../Resource/bomb1.png");
+
 
 	// YOUR_TEAM
 	m_texture[TEX_KING2] = m_Renderer->CreatePngTexture("../Resource/king2.png");
 	m_texture[TEX_BUILDING2] = m_Renderer->CreatePngTexture("../Resource/building2.png");
 	m_texture[TEX_GROUNDUNIT2] = m_Renderer->CreatePngTexture("../Resource/enemy01.png");
-	m_texture[TEX_BULLET2] = m_Renderer->CreatePngTexture("../Resource/particle03.png");
-	m_texture[7] = m_Renderer->CreatePngTexture("../Resource/particle04.png");
+	m_texture[TEX_FLYUNIT2] = m_Renderer->CreatePngTexture("../Resource/fly02.png");
+	m_texture[TEX_BULLET2] = m_Renderer->CreatePngTexture("../Resource/particle06.png");
+	m_texture[TEX_BOMBUNIT2] = m_Renderer->CreatePngTexture("../Resource/bomb2.png");
+
+
+	// 날씨 파티클
+	m_texture[TEX_WEATHER] = m_Renderer->CreatePngTexture("../Resource/particle04.png");
 }
 
 bool CSceneMgr::CollisionObjs(CObj *& Obj_1, CObj *& Obj_2)
@@ -226,9 +263,7 @@ void CSceneMgr::CollisionCompare()
 				{
 					ObjTypeCompare(m_Objs[i], m_Objs[j]);
 				}
-
 			}
-
 		}
 	}
 }
@@ -242,7 +277,6 @@ bool CSceneMgr::ObjTypeCompare(CObj* & Obj_1, CObj* & Obj_2)
 	// Building and Bullet 충돌
 	ObjTypeCollision(Obj_1, Obj_2);
 	ObjTypeCollision(Obj_2, Obj_1);
-
 	return true;
 }
 
@@ -254,18 +288,28 @@ void CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
 	bool isBuilding1 = Obj_1->GetType() == OBJECT_BUILDING;
 	bool isBullet1 = Obj_1->GetType() == OBJECT_BULLET;
 	bool isArrow1 = Obj_1->GetType() == OBJECT_ARROW;
+	bool isFly1 = Obj_1->GetType() == OBJECT_FLYUNIT;
+	bool isBomb1 = Obj_1->GetType() == OBJECT_BOMBUNIT;
 
 	bool isCharacter2 = Obj_2->GetType() == OBJECT_GROUNDUNIT;
 	bool isKing2 = Obj_2->GetType() == OBJECT_KING;
 	bool isBuilding2 = Obj_2->GetType() == OBJECT_BUILDING;
 	bool isBullet2 = Obj_2->GetType() == OBJECT_BULLET;
 	bool isArrow2 = Obj_2->GetType() == OBJECT_ARROW;
+	bool isFly2 = Obj_2->GetType() == OBJECT_FLYUNIT;
+	bool isBomb2 = Obj_2->GetType() == OBJECT_BOMBUNIT;
+
 
 	// CHARACTER와 충돌들.
 	if (isCharacter1 && isCharacter2)
 	{
 		Obj_1->SetDamage(10);
 		Obj_2->SetDamage(10);
+	}
+	if (isFly1 && isFly2)
+	{
+		Obj_1->SetDamage(5);
+		Obj_2->SetDamage(5);
 	}
 	if (isCharacter1 && isKing2)
 	{
@@ -289,6 +333,32 @@ void CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
 		Obj_1->SetDamage(Obj_2->GetLife());
 		Obj_2->SetLife(0);
 	}
+
+	if (isFly1 && isBullet2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
+
+	if (isFly1 && isArrow2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
+	if (isBomb1 && isFly2)
+	{
+		Obj_1->SetDamage(1);
+	}
+	if (isBomb1 && isBullet2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
+	if (isBomb1 && isArrow2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
 	// 킹 빌딩들과 충돌
 	if (isKing1 && isBullet2)
 	{
@@ -296,6 +366,11 @@ void CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
 		Obj_2->SetLife(0);
 	}
 	if (isKing1 && isArrow2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
+	if (isKing1 && isBomb2)
 	{
 		Obj_1->SetDamage(Obj_2->GetLife());
 		Obj_2->SetLife(0);
@@ -311,16 +386,90 @@ void CSceneMgr::ObjTypeCollision(CObj *& Obj_1, CObj *& Obj_2)
 		Obj_1->SetDamage(Obj_2->GetLife());
 		Obj_2->SetLife(0);
 	}
+	if (isBuilding1 && isBomb2)
+	{
+		Obj_1->SetDamage(Obj_2->GetLife());
+		Obj_2->SetLife(0);
+	}
 }
 
 void CSceneMgr::CreateBullet(CObj *& Obj)
 {
-	bool isType = Obj->GetType() == OBJECT_BUILDING || Obj->GetType() == OBJECT_KING;
+	bool isType = Obj->GetType() == OBJECT_BUILDING;
 	bool isTime = Obj->GetBulletTime() > 2.f;		// 2초당 1발씩.
 	if (isType && isTime)
 	{
 		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_BULLET);
 		Obj->ReSetBulletTime();
+	}
+
+	isType = Obj->GetType() == OBJECT_KING;
+	isTime = Obj->GetBulletTime() > 3.f;		// 2초당 1발씩.
+	if (isType && isTime)
+	{
+		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_BULLET);
+		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_BULLET);
+		Obj->ReSetBulletTime();
+	}
+}
+
+void CSceneMgr::CreateGroundUnit(float elapsedTime)
+{
+	m_PlayerCoolTime += elapsedTime / 1000.f;
+	bool isTime = m_PlayerCoolTime > 2.f;	// 2초당 1발씩.
+
+	if (isTime)
+	{
+		float x = float(rand() % 400) - 180.f;
+		float y = float(rand() % 350) + 50.f;
+		AddActorObject(x, y, TEAM_YOUR, OBJECT_GROUNDUNIT);
+		m_PlayerCoolTime = 0.f;
+		//m_particleTime = 0.f;
+	}
+}
+
+void CSceneMgr::CreateFlyUnit(float elapsedTime)
+{
+	m_FlyCoolTime += elapsedTime / 1000.f;
+	bool isTime = m_FlyCoolTime > 5.f;	// 2초당 1발씩.
+
+	if (isTime)
+	{
+		{
+			float x = float(rand() % 400) - 180.f;
+			float y = float(rand() % 350) + 50.f;
+			AddActorObject(x, y, TEAM_YOUR, OBJECT_FLYUNIT);
+		}
+		{
+			float x = float(rand() % 400) - 180.f;
+			float y = float(rand() % 350) - 400.f;
+			AddActorObject(x, y, TEAM_MY, OBJECT_FLYUNIT);
+		}
+		
+		m_FlyCoolTime = 0.f;
+		//m_particleTime = 0.f;
+	}
+}
+
+void CSceneMgr::CreateBombUnit(float elapsedTime)
+{
+	m_BombCoolTime += elapsedTime / 1000.f;
+	bool isTime = m_BombCoolTime > 5.f;	// 2초당 1발씩.
+
+	if (isTime)
+	{
+		{
+			float x = float(rand() % 400) - 180.f;
+			float y = float(rand() % 350) + 50.f;
+			AddActorObject(x, y, TEAM_YOUR, OBJECT_BOMBUNIT);
+		}
+		{
+			float x = float(rand() % 400) - 180.f;
+			float y = float(rand() % 350) - 400.f;
+			AddActorObject(x, y, TEAM_MY, OBJECT_BOMBUNIT);
+		}
+
+		m_BombCoolTime = 0.f;
 	}
 }
 
@@ -335,18 +484,16 @@ void CSceneMgr::CreateArrow(CObj *& Obj)
 	}
 }
 
-void CSceneMgr::CreateCharacter(float elapsedTime)
+void CSceneMgr::CreateFlyArrow(CObj *& Obj)
 {
-	m_PlayerCoolTime += elapsedTime / 1000.f;
-	bool isTime = m_PlayerCoolTime > 1.f;	// 2초당 1발씩.
-
-	if (isTime)
+	bool isType = Obj->GetType() == OBJECT_FLYUNIT;
+	bool isTime = Obj->GetArrowTime() > 2.f;		// 1초당 1발씩.
+	if (isType && isTime)
 	{
-		float x = float(rand() % 400) - 180.f;
-		float y = float(rand() % 350) + 50.f;
-		AddActorObject(x, y, TEAM_YOUR, OBJECT_GROUNDUNIT);
-		m_PlayerCoolTime = 0.f;
-		//m_particleTime = 0.f;
+		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_ARROW);
+		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_ARROW);
+		AddActorObject(Obj->GetXpos(), Obj->GetYpos(), Obj->GetTeam(), OBJECT_ARROW);
+		Obj->ReSetArrowTime();
 	}
 }
 

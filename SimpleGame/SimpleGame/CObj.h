@@ -8,6 +8,7 @@ public:
 
 	float GetXpos() { return xPos; }
 	float GetYpos() { return yPos; }
+
 	float GetSize() { return m_size; }
 	float GetcolorR() { return colR; }
 	float GetcolorG() { return colG; }

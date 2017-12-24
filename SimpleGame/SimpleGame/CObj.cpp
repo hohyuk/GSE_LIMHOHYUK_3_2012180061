@@ -18,7 +18,7 @@ CObj::CObj(float x, float y, TEAM team, OBJTYPE type)
 	if (m_type == OBJECT_KING)
 	{
 		m_size = 150.f;
-		m_FullLife = m_life = 1000;
+		m_FullLife = m_life = 2500;
 		speedX = 0.f;
 		speedY = 0.f;
 		m_level = OBJLEVEL_BUILDING;
@@ -27,7 +27,7 @@ CObj::CObj(float x, float y, TEAM team, OBJTYPE type)
 	else if (m_type == OBJECT_BUILDING)
 	{
 		m_size = 100.f;
-		m_FullLife = m_life = 500;
+		m_FullLife = m_life = 1500;
 		speedX = 0.f;
 		speedY = 0.f;
 		m_level = OBJLEVEL_BUILDING;
@@ -35,19 +35,59 @@ CObj::CObj(float x, float y, TEAM team, OBJTYPE type)
 	}
 	else if (m_type == OBJECT_GROUNDUNIT)
 	{
-		m_size = 30.f;
+		m_size = 50.f;
 		m_FullLife = m_life = 100;
 		speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-		speedY = 300.f * (((float)rand() / (float)RAND_MAX));
+		if (m_team == TEAM_MY)
+		{
+			speedY = 100.f * (((float)rand() / (float)RAND_MAX));
+		}
+		else if (m_team == TEAM_YOUR)
+		{
+			speedY = -100.f * (((float)rand() / (float)RAND_MAX));
+		}
 		m_level = OBJLEVEL_CHARACTER;
 		m_gauge = 1.f;
 		m_anim = 0;
+	}
+	else if (m_type == OBJECT_FLYUNIT)
+	{
+		m_size = 50.f;
+		m_FullLife = m_life = 150;
+		speedX = 100.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		if (m_team == TEAM_MY)
+		{
+			speedY = 100.f * (((float)rand() / (float)RAND_MAX));
+		}
+		else if (m_team == TEAM_YOUR)
+		{
+			speedY = -100.f * (((float)rand() / (float)RAND_MAX));
+		}
+		m_level = OBJLEVEL_FLY;
+		m_gauge = 1.f;
+	}
+	else if (m_type == OBJECT_BOMBUNIT)
+	{
+		m_size = 50.f;
+		m_FullLife = m_life = 200;
+		speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		m_level = OBJLEVEL_BOMB;
+		m_gauge = 1.f;
+		if (m_team == TEAM_MY)
+		{
+			speedY = 500.f * (((float)rand() / (float)RAND_MAX));
+		}
+		else if (m_team == TEAM_YOUR)
+		{
+			speedY = -500.f * (((float)rand() / (float)RAND_MAX));
+		}
 	}
 	else if (m_type == OBJECT_BULLET)
 	{
 		m_size = 15.f;
 		m_life = 15;
-		speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		float random = (((float)rand() / (float)RAND_MAX) - 0.5f);
+		speedX = 300.f * random;
 		m_level = OBJLEVEL_BULLET;
 		m_paticleTime = 0.f;
 		if (m_team == TEAM_MY)
@@ -55,23 +95,23 @@ CObj::CObj(float x, float y, TEAM team, OBJTYPE type)
 			speedY = 300.f;
 			m_paticleDir = -1.f;
 			if (speedX > 0)
-				m_paticleDirX = 1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+				m_paticleDirX = -1.f * random;
 			else
-				m_paticleDirX = -1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+				m_paticleDirX = -1.f * random;
 		}
 		else if (m_team == TEAM_YOUR)
 		{
 			speedY = -300.f;
 			m_paticleDir = 1.f;
 			if (speedX > 0)
-				m_paticleDirX = -1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+				m_paticleDirX = -1.f * random;
 			else
-				m_paticleDirX = 1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+				m_paticleDirX = -1.f * random;
 		}
 	}
 	else if (m_type == OBJECT_ARROW)
 	{
-		m_size = 4.f;
+		m_size = 5.f;
 		m_life = 10;
 		speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 		speedY = 600.f * (float(rand() % 2) - 0.5f);
@@ -100,6 +140,7 @@ void CObj::Update(float elapsedTime)
 	
 	// anim
 	m_anim = (m_anim + 1) % 5;
+	
 	moveObjs();
 }
 

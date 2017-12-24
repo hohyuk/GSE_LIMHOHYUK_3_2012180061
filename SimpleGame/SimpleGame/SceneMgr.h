@@ -22,8 +22,12 @@ private:
 	bool ObjTypeCompare(CObj* & Obj_1, CObj* & Obj_2);
 	void ObjTypeCollision(CObj* & Obj_1, CObj* & Obj_2);
 	void CreateBullet(CObj*& Obj);
+	void CreateGroundUnit(float elapsedTime);
+	void CreateFlyUnit(float elapsedTime);
+	void CreateBombUnit(float elapsedTime);
 	void CreateArrow(CObj*& Obj);
-	void CreateCharacter(float elapsedTime);
+	void CreateFlyArrow(CObj*& Obj);
+
 
 	// Render
 	void BackGroundRender();
@@ -36,6 +40,8 @@ private:
 	Renderer* m_Renderer;
 	CObj* m_Objs[MAX_OBJ_COUNT];
 	GLfloat m_PlayerCoolTime;
+	GLfloat m_FlyCoolTime;
+	GLfloat m_BombCoolTime;
 	GLfloat m_particleTime;
 	GLuint m_texture[TEX_MAX_COUNT];
 
