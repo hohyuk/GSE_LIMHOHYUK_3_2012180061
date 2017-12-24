@@ -6,7 +6,7 @@ CObj::CObj()
 {
 }
 
-CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
+CObj::CObj(float x, float y, TEAM team, OBJTYPE type)
 	:xPos(x),yPos(y),m_team(team),m_type(type)
 {
 
@@ -14,99 +14,75 @@ CObj::CObj(float x, float y, OBJTYPE team, OBJTYPE type)
 	m_arrowTime = 0.f;
 	// 객체 속도와 방향을 랜덤값으로 만든다. 교수님 코드 참조. RAND_MAX는 rand()의 MAX값.
 	// -0.5를 해주는 이유는 양수와 음수를 만든다. (rand()/RAND_MAX = 0~1사이의 값)
-	if (team == OBJECT_PLAYER)
+
+	if (m_type == OBJECT_KING)
 	{
-		switch (type)
+		m_size = 150.f;
+		m_FullLife = m_life = 1000;
+		speedX = 0.f;
+		speedY = 0.f;
+		m_level = OBJLEVEL_BUILDING;
+		m_gauge = 1.f;
+	}
+	else if (m_type == OBJECT_BUILDING)
+	{
+		m_size = 100.f;
+		m_FullLife = m_life = 500;
+		speedX = 0.f;
+		speedY = 0.f;
+		m_level = OBJLEVEL_BUILDING;
+		m_gauge = 1.f;
+	}
+	else if (m_type == OBJECT_GROUNDUNIT)
+	{
+		m_size = 30.f;
+		m_FullLife = m_life = 100;
+		speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		speedY = 300.f * (((float)rand() / (float)RAND_MAX));
+		m_level = OBJLEVEL_CHARACTER;
+		m_gauge = 1.f;
+		m_anim = 0;
+	}
+	else if (m_type == OBJECT_BULLET)
+	{
+		m_size = 15.f;
+		m_life = 15;
+		speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		m_level = OBJLEVEL_BULLET;
+		m_paticleTime = 0.f;
+		if (m_team == TEAM_MY)
 		{
-		case OBJECT_CHARACTER:
-			//colR = colG = colB = colA = 1.f;
-			m_size = 30.f;
-			m_FullLife = m_life = 100;
-			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			speedY = 300.f * (((float)rand() / (float)RAND_MAX));
-			m_level = OBJLEVEL_CHARACTER;
-			m_gauge = 1.f;
-			m_anim = 0.f;
-			break;
-		case OBJECT_BUILDING:
-			//colR = colG = colB = colA = 1.f;
-			m_size = 100.f;
-			m_FullLife = m_life = 500;
-			speedX = 0.f;
-			speedY = 0.f;
-			m_level = OBJLEVEL_BUILDING;
-			m_gauge = 1.f;
-			break;
-		case OBJECT_BULLET:
-			colR = colG = 0.f; colB = colA = 1.f;
-			m_size = 15.f;
-			m_life = 15;
-			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			speedY = 300.f;
+			m_paticleDir = -1.f;
 			if (speedX > 0)
 				m_paticleDirX = 1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 			else
 				m_paticleDirX = -1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-
-			speedY = 300.f;
-			m_level = OBJLEVEL_BULLET;
-			m_paticleTime = 0.f;
-			m_paticleDir = -1.f;
-			break;
-		case OBJECT_ARROW:
-			colR = colG = colA = 1.f; colB = 0.f;
-			m_size = 4.f;
-			m_life = 10;
-			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			speedY = 600.f * (float(rand() % 2) - 0.5f);
-			m_level = OBJLEVEL_ARROW;
-			break;
+		}
+		else if (m_team == TEAM_YOUR)
+		{
+			speedY = -300.f;
+			m_paticleDir = 1.f;
+			if (speedX > 0)
+				m_paticleDirX = -1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+			else
+				m_paticleDirX = 1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
 		}
 	}
-	else if (team == OBJECT_ENEMY)
+	else if (m_type == OBJECT_ARROW)
 	{
-		switch (type)
+		m_size = 4.f;
+		m_life = 10;
+		speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
+		speedY = 600.f * (float(rand() % 2) - 0.5f);
+		m_level = OBJLEVEL_ARROW;
+		if (m_team == TEAM_MY)
 		{
-		case OBJECT_CHARACTER: 
-			//colR = colG = colB = colA = 1.f;
-			m_size = 30.f;
-			m_FullLife = m_life = 100;
-			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			speedY = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			m_level = OBJLEVEL_CHARACTER;
-			m_gauge = 1.f;
-			m_anim = 0.f;
-			break;
-		case OBJECT_BUILDING:
-			//colR = colG = colB = colA = 1.f;
-			m_size = 100.f;
-			m_FullLife = m_life = 500;
-			speedX = 0.f;
-			speedY = 0.f;
-			m_level = OBJLEVEL_BUILDING;
-			m_gauge = 1.f;
-			break;
-		case OBJECT_BULLET:
-			colR = colA = 1.f; colG = colB = 0.f;
-			m_size = 10.f;
-			m_life = 15;
-			speedX = 300.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			if (speedX > 0)
-				m_paticleDirX = -1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			else
-				m_paticleDirX = 1.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			speedY = -300.f; 
-			m_level = OBJLEVEL_BULLET;
-			m_paticleTime = 0.f;
-			m_paticleDir = 1.f;
-			break;
-		case OBJECT_ARROW:
+			colR = colG = colA = 1.f; colB = 0.f;
+		}
+		else if (m_team == TEAM_YOUR)
+		{
 			colR = 0.5f, colG = 0.2f, colB = 0.7f, colA = 1.f;
-			m_size = 4.f;
-			m_life = 10;
-			speedX = 600.f * (((float)rand() / (float)RAND_MAX) - 0.5f);
-			speedY = 600.f * (float(rand() % 2) - 0.5f); 
-			m_level = OBJLEVEL_ARROW;
-			break;
 		}
 	}
 }
@@ -123,7 +99,7 @@ void CObj::Update(float elapsedTime)
 	m_paticleTime += ElapsedTimeSecond;
 	
 	// anim
-	m_anim += (m_anim + 1) % 5;
+	m_anim = (m_anim + 1) % 5;
 	moveObjs();
 }
 

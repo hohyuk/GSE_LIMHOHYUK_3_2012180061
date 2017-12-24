@@ -3,7 +3,7 @@ class CObj
 {
 public:
 	CObj();
-	CObj(float x, float y, OBJTYPE team, OBJTYPE type);
+	CObj(float x, float y, TEAM team, OBJTYPE type);
 	~CObj();
 
 	float GetXpos() { return xPos; }
@@ -16,7 +16,7 @@ public:
 
 	float GetLife() { return m_life; }
 	float GetLifeTime() { return m_lifeTime; }
-	OBJTYPE GetTeam() { return m_team; }
+	TEAM GetTeam() { return m_team; }
 	OBJTYPE GetType() { return m_type; }
 	void SetColor(float r, float g, float b, float a) { colR = r, colG = g, colB = b, colA = a; }
 	void SetLife(float life) { m_life = life; }
@@ -49,7 +49,7 @@ private:
 	float m_FullLife;
 	float m_life;
 	float m_lifeTime;
-	OBJTYPE m_team;
+	TEAM m_team;
 	OBJTYPE m_type;
 	float m_level;
 	float m_gauge;

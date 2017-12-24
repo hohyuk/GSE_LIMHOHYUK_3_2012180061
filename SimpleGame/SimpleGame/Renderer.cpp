@@ -254,8 +254,8 @@ void Renderer::CreateParticleVBO()
 		float velocityScale = 0.1f;
 		float randomSize = 1.f;
 
-		randomValueX = (rand() / (float)RAND_MAX - 0.5)*velocityScale;
-		randomValueY = (rand() / (float)RAND_MAX - 0.5)*velocityScale;
+		randomValueX = (rand() / (float)RAND_MAX - 0.5f) * velocityScale;
+		randomValueY = (rand() / (float)RAND_MAX - 0.5f) * velocityScale;
 		randomValueZ = 1.f;
 		randomStartTime = (rand() / (float)RAND_MAX)*1.f;
 		randomSize = (rand() / (float)RAND_MAX)*3.f;
@@ -1191,7 +1191,7 @@ unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWi
 		// swap y-axis
 		unsigned char * tmpBuffer = new unsigned char[outWidth * 3];
 		int size = outWidth * 3;
-		for (int i = 0; i<outHeight / 2; i++) {
+		for (unsigned int i = 0; i<outHeight / 2; i++) {
 			// copy row i to tmp
 			memcpy_s(tmpBuffer, size, data + outWidth * 3 * i, size);
 			// copy row h-i-1 to i

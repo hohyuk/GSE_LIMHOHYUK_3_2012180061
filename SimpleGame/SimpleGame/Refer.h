@@ -1,23 +1,28 @@
 #pragma once
 
 // È­¸é 
-const int Width = 500;
+const int Width = 800;
 const int Height = 800;
 // °´Ã¼ °¹¼ö
 const int MAX_OBJ_COUNT{ 100 };
 const int MAX_ARROW_COUNT{ 100 };
 
 // ¸¶¿ì½º Å¬¸¯ ÄðÅ¸ÀÓ
-const float COOLTIME{ 2.f };
+const float COOLTIME{ 1.f };
 
 enum OBJTYPE
 {
-	OBJECT_PLAYER,
-	OBJECT_ENEMY,
+	OBJECT_KING,
 	OBJECT_BUILDING,
-	OBJECT_CHARACTER,
+	OBJECT_GROUNDUNIT,
 	OBJECT_BULLET,
 	OBJECT_ARROW
+};
+
+enum TEAM
+{
+	TEAM_MY,
+	TEAM_YOUR
 };
 
 #define OBJLEVEL_BUILDING 0.1f
@@ -30,10 +35,13 @@ enum OBJTYPE
 enum TEXTURE
 {
 	TEX_BACKGROUND,
+	TEX_KING1,
+	TEX_KING2,
 	TEX_BUILDING1,
 	TEX_BUILDING2,
-	TEX_CHARACTER1,
-	TEX_CHARACTER2,
+	TEX_GROUNDUNIT1,
+	TEX_GROUNDUNIT2,
 	TEX_BULLET1,
-	TEX_BULLET2
+	TEX_BULLET2,
+	TEX_MAX_COUNT,
 };

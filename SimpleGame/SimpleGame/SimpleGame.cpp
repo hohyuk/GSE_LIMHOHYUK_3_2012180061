@@ -50,7 +50,7 @@ void MouseInput(int button, int state, int x, int y)
 	
 	if (South_IN)
 	{
-		g_SceneMgr->AddActorObject(resetX, resetY, OBJECT_PLAYER, OBJECT_CHARACTER);
+		g_SceneMgr->AddActorObject(resetX, resetY, TEAM_MY, OBJECT_GROUNDUNIT);
 		g_coolTime = 0.f;
 	}
 	RenderScene();
